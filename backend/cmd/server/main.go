@@ -3,6 +3,9 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 )
 
 func main() {
@@ -39,10 +42,26 @@ func main() {
 	})
 
 	// Root endpoint
-	http.HandleFunc("/", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"message": "Trenager API", "endpoints": ["/api/test", "/health"]}`))
-	}))
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// Если это API запрос - 404
+		if strings.HasPrefix(r.URL.Path, "/api/") {
+			http.NotFound(w, r)
+			return
+		}
+
+		// Обслуживаем статические файлы фронтенда
+		staticDir := "./static"
+		filePath := filepath.Join(staticDir, r.URL.Path)
+
+		// Проверяем существует ли файл
+		if _, err := os.Stat(filePath); err == nil && r.URL.Path != "/" {
+			http.ServeFile(w, r, filePath)
+			return
+		}
+
+		// Для всех остальных маршрутов отдаем index.html (SPA)
+		http.ServeFile(w, r, filepath.Join(staticDir, "index.html"))
+	})
 
 	log.Printf("✅ Сервер готов принимать запросы на порту %s", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
