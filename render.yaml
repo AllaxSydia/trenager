@@ -1,11 +1,11 @@
 services:
-  # Backend service
+  # Основной сервис (бэкенд + фронтенд)
   - type: web
-    name: trenager-backend
+    name: trenager
     env: docker
-    rootDirectory: backend  # ← ДОБАВИТЬ ЭТУ СТРОЧКУ
+    rootDirectory: backend
     docker:
-      dockerfile: Dockerfile  # ← ИЗМЕНИТЬ ПУТЬ
+      dockerfile: Dockerfile
     envVars:
       - key: PORT
         value: 8080
@@ -31,26 +31,13 @@ services:
           property: database
       - key: DB_SSLMODE
         value: require
-    plans:
-      - name: free
-        cpu: 0.25
-        memory: 512MB
-        maxConcurrentBuilds: 1
-
-  # Frontend service
-  - type: web
-    name: trenager-frontend
-    env: static
-    rootDirectory: frontend  # ← ДОБАВИТЬ ЭТУ СТРОЧКУ
-    buildCommand: |
-      npm install
-      npm run build
-    staticPublishPath: ./dist  # ← ИЗМЕНИТЬ ПУТЬ
-    envVars:
       - key: VITE_API_URL
-        value: https://trenager.onrender.com
+        value: https://trenager.onrender.com/api
     routes:
       - type: rewrite
+        source: /api/*
+        destination: /api/*
+      - type: rewrite  
         source: /*
         destination: /index.html
     plans:
