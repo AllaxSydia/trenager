@@ -1,11 +1,26 @@
 import axios from 'axios'
 
-const API_BASE_URL = 'http://localhost:8080/api'
+// Определяем базовый URL в зависимости от среды
+const isDevelopment = import.meta.env.DEV
+const API_BASE_URL = isDevelopment 
+  ? 'http://localhost:10000/api'  // разработка - порт 10000
+  : '/api'                        // продакшен - относительный путь
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000, // Увеличили таймаут для выполнения кода
+  timeout: 30000,
 })
+
+// Добавляем обработчик ошибок
+api.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.code === 'ECONNREFUSED' || !error.response) {
+      throw new Error('Не удалось подключиться к серверу. Проверьте, запущен ли бэкенд.')
+    }
+    throw error
+  }
+)
 
 export const taskService = {
   // Получить все задачи

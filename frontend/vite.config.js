@@ -3,17 +3,16 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   plugins: [vue()],
-  resolve: {
-    alias: {
-      '@': '/src'
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',  // твой бэкенд
+        changeOrigin: true,
+        secure: false
+      }
     }
   },
-  server: {
-    host: true, // Для Docker
-    port: 5173
-  },
   build: {
-    chunkSizeWarningLimit: 1000,
     outDir: 'dist'
   }
 })

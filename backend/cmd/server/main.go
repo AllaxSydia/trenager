@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 )
 
 func main() {
@@ -11,30 +10,21 @@ func main() {
 
 	log.Printf("🚀 Запуск сервера на порту %s", port)
 
-	// Логируем текущую директорию
-	wd, _ := os.Getwd()
-	log.Printf("📁 Рабочая директория: %s", wd)
-
-	// Проверяем существование статических файлов
-	if _, err := os.Stat("./static"); err != nil {
-		log.Printf("❌ Статическая директория не найдена: %v", err)
-	} else {
-		log.Printf("✅ Статическая директория найдена")
-		files, _ := os.ReadDir("./static")
-		log.Printf("📄 Файлы в static: %v", files)
-	}
-
-	// CORS middleware
+	// Улучшенный CORS middleware
 	corsMiddleware := func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
+			// Разрешаем запросы с любого origin (в продакшене укажи конкретный домен)
 			w.Header().Set("Access-Control-Allow-Origin", "*")
-			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
 
+			// Обрабатываем preflight OPTIONS запрос
 			if r.Method == "OPTIONS" {
 				w.WriteHeader(http.StatusOK)
 				return
 			}
+
 			next(w, r)
 		}
 	}
@@ -43,6 +33,7 @@ func main() {
 	http.HandleFunc("/api/test", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"status": "ok", "message": "API is working"}`))
+		log.Printf("✅ API test called from: %s", r.RemoteAddr)
 	}))
 
 	// Health check
