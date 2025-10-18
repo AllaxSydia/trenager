@@ -1,40 +1,37 @@
 # Мультистадийная сборка
 FROM golang:1.24-alpine AS backend
 
-WORKDIR /app
+RUN apk add --no-cache gcc musl-dev
 
-# Копируем и собираем бэкенд (из папки backend на одном уровне с Dockerfile)
-COPY backend/ ./backend/
-WORKDIR /app/backend
+WORKDIR /app
+COPY backend/ .
 RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/server
+RUN go build -o main ./cmd/server
 
 FROM node:20-alpine AS frontend
 
 WORKDIR /app
-
-# Копируем и собираем фронтенд (из папки frontend на одном уровне с Dockerfile)
-COPY frontend/ ./frontend/
-WORKDIR /app/frontend
+COPY frontend/ .
 RUN npm ci
 RUN npm run build
 
 # Финальный образ
-FROM alpine:latest
+FROM golang:1.24-alpine
 
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache gcc musl-dev
 
 WORKDIR /app
 
 # Копируем бэкенд
-COPY --from=backend /app/backend/main .
+COPY --from=backend /app/main .
 
 # Копируем фронтенд
-COPY --from=frontend /app/frontend/dist ./static
+COPY --from=frontend /app/dist ./static
 
-# Исправляем права
-RUN chmod -R 755 ./static
+# Создаем пользователя
+RUN adduser -D -s /bin/sh appuser
+USER appuser
 
-EXPOSE 10000
+EXPOSE 8080
 
 CMD ["./main"]
