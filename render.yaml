@@ -1,15 +1,11 @@
-
-### **2. Обновляем render.yaml для продакшена:**
-
-**render.yaml:**
-```yaml
 services:
   # Backend service
   - type: web
     name: trenager-backend
     env: docker
+    rootDirectory: backend  # ← ДОБАВИТЬ ЭТУ СТРОЧКУ
     docker:
-      dockerfile: ./backend/Dockerfile
+      dockerfile: Dockerfile  # ← ИЗМЕНИТЬ ПУТЬ
     envVars:
       - key: PORT
         value: 8080
@@ -45,14 +41,14 @@ services:
   - type: web
     name: trenager-frontend
     env: static
+    rootDirectory: frontend  # ← ДОБАВИТЬ ЭТУ СТРОЧКУ
     buildCommand: |
-      cd frontend
       npm install
       npm run build
-    staticPublishPath: ./frontend/dist
+    staticPublishPath: ./dist  # ← ИЗМЕНИТЬ ПУТЬ
     envVars:
       - key: VITE_API_URL
-        value: https://trenager-backend.onrender.com/api
+        value: https://trenager.onrender.com
     routes:
       - type: rewrite
         source: /*
