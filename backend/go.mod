@@ -1,6 +1,6 @@
 module backend
 
-go 1.22.0
+go 1.24.0
 
 require (
 	github.com/docker/docker v24.0.7+incompatible

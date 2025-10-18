@@ -1,5 +1,5 @@
 # Мультистадийная сборка
-FROM golang:1.22-alpine AS backend
+FROM golang:1.24-alpine AS backend
 
 WORKDIR /app
 
