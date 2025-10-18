@@ -2,7 +2,7 @@
 ARG TARGET=backend
 
 # Бэкенд
-FROM golang:1.22-alpine as backend-build  # ← ИЗМЕНИ НА 1.22
+FROM golang:1.22-alpine AS backend-build  # ← ИЗМЕНИ НА 1.22
 WORKDIR /app
 COPY backend/ .
 RUN go mod download
