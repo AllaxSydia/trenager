@@ -3,8 +3,9 @@ FROM golang:1.24-alpine AS backend
 
 WORKDIR /app
 
-# Копируем и собираем бэкенд
-COPY backend/ .
+# Копируем и собираем бэкенд (из папки backend на одном уровне с Dockerfile)
+COPY backend/ ./backend/
+WORKDIR /app/backend
 RUN go mod download
 RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/server
 
@@ -12,8 +13,9 @@ FROM node:20-alpine AS frontend
 
 WORKDIR /app
 
-# Копируем и собираем фронтенд
-COPY frontend/ .
+# Копируем и собираем фронтенд (из папки frontend на одном уровне с Dockerfile)
+COPY frontend/ ./frontend/
+WORKDIR /app/frontend
 RUN npm ci
 RUN npm run build
 
@@ -22,24 +24,16 @@ FROM alpine:latest
 
 RUN apk add --no-cache ca-certificates
 
-WORKDIR /root/
+WORKDIR /app
 
 # Копируем бэкенд
-COPY --from=backend /app/main .
+COPY --from=backend /app/backend/main .
 
 # Копируем фронтенд
-COPY --from=frontend /app/dist ./static
+COPY --from=frontend /app/frontend/dist ./static
 
-# Исправляем права и владельца
-RUN chmod -R 755 ./static && \
-    chown -R 1000:1000 ./static  # ← ДОБАВЬ ЭТУ СТРОЧКУ!
-
-# Проверяем что файлы есть и права правильные
-RUN ls -la ./static/
-
-# Создаем пользователя
-RUN adduser -D -s /bin/sh -u 1000 appuser
-USER appuser
+# Исправляем права
+RUN chmod -R 755 ./static
 
 EXPOSE 10000
 

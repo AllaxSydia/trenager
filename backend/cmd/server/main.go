@@ -3,12 +3,26 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
 	port := "10000"
 
 	log.Printf("🚀 Запуск сервера на порту %s", port)
+
+	// Логируем текущую директорию
+	wd, _ := os.Getwd()
+	log.Printf("📁 Рабочая директория: %s", wd)
+
+	// Проверяем существование статических файлов
+	if _, err := os.Stat("./static"); err != nil {
+		log.Printf("❌ Статическая директория не найдена: %v", err)
+	} else {
+		log.Printf("✅ Статическая директория найдена")
+		files, _ := os.ReadDir("./static")
+		log.Printf("📄 Файлы в static: %v", files)
+	}
 
 	// CORS middleware
 	corsMiddleware := func(next http.HandlerFunc) http.HandlerFunc {
@@ -37,7 +51,7 @@ func main() {
 		w.Write([]byte(`{"status": "healthy"}`))
 	})
 
-	// Serve frontend static files (простая версия)
+	// Serve frontend static files
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 
 	log.Printf("✅ Сервер готов принимать запросы на порту %s", port)
