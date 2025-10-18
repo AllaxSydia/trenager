@@ -9,7 +9,7 @@ RUN go mod download
 RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd
 
 # Фронтенд  
-FROM node:20-alpine as frontend-build      # ← ИЗМЕНИ НА 20
+FROM node:20-alpine AS frontend-build      # ← ИЗМЕНИ НА 20
 WORKDIR /app
 COPY frontend/ .
 RUN npm ci
