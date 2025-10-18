@@ -1,9 +1,8 @@
 services:
-  # Основной сервис (бэкенд + фронтенд)
+  # Единственный сервис (бэкенд + фронтенд)
   - type: web
     name: trenager
     env: docker
-    rootDirectory: backend
     docker:
       dockerfile: Dockerfile
     envVars:
@@ -31,15 +30,6 @@ services:
           property: database
       - key: DB_SSLMODE
         value: require
-      - key: VITE_API_URL
-        value: https://trenager.onrender.com/api
-    routes:
-      - type: rewrite
-        source: /api/*
-        destination: /api/*
-      - type: rewrite  
-        source: /*
-        destination: /index.html
     plans:
       - name: free
         cpu: 0.25
