@@ -1,28 +1,26 @@
-# Корневой Dockerfile
-ARG APP=backend
+# Указываем какую часть собирать
+ARG TARGET=backend
 
-FROM node:18-alpine as frontend
-WORKDIR /app
-COPY frontend/ .
-RUN npm ci
-RUN npm run build
-
-FROM golang:1.21-alpine as backend
+# Бэкенд
+FROM golang:1.22-alpine as backend-build  # ← ИЗМЕНИ НА 1.22
 WORKDIR /app
 COPY backend/ .
 RUN go mod download
 RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd
 
-FROM alpine:latest as production
+# Фронтенд  
+FROM node:20-alpine as frontend-build      # ← ИЗМЕНИ НА 20
+WORKDIR /app
+COPY frontend/ .
+RUN npm ci
+RUN npm run build
 
-# Выбираем что запускать через ARG
-ARG APP
-WORKDIR /root/
+# Финальный образ
+FROM alpine:latest
 
-COPY --from=backend /app/main ./main
-COPY --from=frontend /app/dist ./frontend-dist
+WORKDIR /app
+COPY --from=backend-build /app/main ./main
+COPY --from=frontend-build /app/dist ./static
 
-# Запускаем выбранное приложение
-CMD if [ "$APP" = "backend" ]; then ./main; else cd frontend-dist && nginx -g 'daemon off;'; fi
-
-EXPOSE 8080 3000
+EXPOSE 8080
+CMD ["./main"]
