@@ -12,12 +12,31 @@ func main() {
 	cfg := config.Load()
 
 	// Настройка CORS middleware
+	// CORS middleware
 	corsMiddleware := func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+			// Разрешаем конкретные домены
+			origin := r.Header.Get("Origin")
+			allowedOrigins := []string{
+				"https://trenager.onrender.com",
+				"https://tranager.onrender.com",
+				"http://localhost:3000",
+				"http://localhost:5173",
+			}
 
+			// Проверяем разрешен ли origin
+			for _, allowed := range allowedOrigins {
+				if origin == allowed {
+					w.Header().Set("Access-Control-Allow-Origin", origin)
+					break
+				}
+			}
+
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
+
+			// Обрабатываем preflight OPTIONS
 			if r.Method == "OPTIONS" {
 				w.WriteHeader(http.StatusOK)
 				return
