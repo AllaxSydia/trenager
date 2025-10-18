@@ -6,8 +6,7 @@ import (
 )
 
 func main() {
-	// Получаем порт от Render
-	port := getPort()
+	port := "10000"
 
 	log.Printf("🚀 Запуск сервера на порту %s", port)
 
@@ -38,17 +37,9 @@ func main() {
 		w.Write([]byte(`{"status": "healthy"}`))
 	})
 
-	// Serve frontend static files
+	// Serve frontend static files (простая версия)
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 
 	log.Printf("✅ Сервер готов принимать запросы на порту %s", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
-}
-
-func getPort() string {
-	port := "10000"
-	if envPort := "10000"; envPort != "" {
-		port = envPort
-	}
-	return port
 }
