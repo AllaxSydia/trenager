@@ -1,22 +1,3 @@
-# Мультистадийная сборка
-FROM golang:1.24-alpine AS backend
-
-WORKDIR /app
-
-# Копируем и собираем бэкенд
-COPY backend/ .
-RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/server
-
-FROM node:20-alpine AS frontend
-
-WORKDIR /app
-
-# Копируем и собираем фронтенд
-COPY frontend/ .
-RUN npm ci
-RUN npm run build
-
 # Финальный образ
 FROM alpine:latest
 
@@ -27,17 +8,13 @@ WORKDIR /root/
 # Копируем бэкенд
 COPY --from=backend /app/main .
 
-# Копируем фронтенд и исправляем права
+# Копируем фронтенд
 COPY --from=frontend /app/dist ./static
-RUN chmod -R 755 ./static  # ← ДОБАВЬ ЭТУ СТРОЧКУ!
 
-# Проверяем что файлы есть и права правильные
-RUN ls -la ./static/
+# Исправляем права
+RUN chmod -R 755 ./static
 
-# Создаем пользователя
-RUN adduser -D -s /bin/sh appuser
-USER appuser
-
+# Запускаем от root (проще для статики)
 EXPOSE 10000
 
 CMD ["./main"]
