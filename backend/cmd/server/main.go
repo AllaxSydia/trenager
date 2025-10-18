@@ -1,17 +1,15 @@
 package main
 
 import (
-	"backend/internal/config"
-	"backend/internal/handlers"
 	"log"
 	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 func main() {
-	cfg := config.Load()
+	// Получаем порт от Render
+	port := getPort()
+
+	log.Printf("🚀 Запуск сервера на порту %s", port)
 
 	// CORS middleware
 	corsMiddleware := func(next http.HandlerFunc) http.HandlerFunc {
@@ -28,41 +26,32 @@ func main() {
 		}
 	}
 
-	// API routes
-	http.HandleFunc("/api/tasks", corsMiddleware(handlers.TasksHandler))
-	http.HandleFunc("/api/execute", corsMiddleware(handlers.ExecuteHandler))
-	http.HandleFunc("/api/auth/guest", corsMiddleware(handlers.GuestAuthHandler))
-	http.HandleFunc("/api/auth/register", corsMiddleware(handlers.RegisterHandler))
-	http.HandleFunc("/api/auth/login", corsMiddleware(handlers.LoginHandler))
+	// Test endpoint
+	http.HandleFunc("/api/test", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"status": "ok", "message": "API is working"}`))
+	}))
 
-	// Serve frontend with SPA routing
-	http.HandleFunc("/", serveSPA)
+	// Health check
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"status": "healthy"}`))
+	})
 
-	log.Printf("🚀 Сервер запущен на порту %s", cfg.Server.Port)
-	log.Fatal(http.ListenAndServe(":"+cfg.Server.Port, nil))
+	// Root endpoint
+	http.HandleFunc("/", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"message": "Trenager API", "endpoints": ["/api/test", "/health"]}`))
+	}))
+
+	log.Printf("✅ Сервер готов принимать запросы на порту %s", port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
-func serveSPA(w http.ResponseWriter, r *http.Request) {
-	// Если это API запрос - 404
-	if strings.HasPrefix(r.URL.Path, "/api/") {
-		http.NotFound(w, r)
-		return
+func getPort() string {
+	port := "10000"
+	if envPort := "10000"; envPort != "" {
+		port = envPort
 	}
-
-	// Путь к статическим файлам
-	staticDir := "./static"
-	indexPath := filepath.Join(staticDir, "index.html")
-
-	// Полный путь к запрашиваемому файлу
-	filePath := filepath.Join(staticDir, r.URL.Path)
-
-	// Проверяем существует ли файл
-	if _, err := os.Stat(filePath); err == nil {
-		// Файл существует - отдаем его
-		http.ServeFile(w, r, filePath)
-		return
-	}
-
-	// Для всех остальных маршрутов отдаем index.html (SPA)
-	http.ServeFile(w, r, indexPath)
+	return port
 }

@@ -1,5 +1,4 @@
 services:
-  # Единственный сервис (бэкенд + фронтенд)
   - type: web
     name: trenager
     env: docker
@@ -7,43 +6,10 @@ services:
       dockerfile: Dockerfile
     envVars:
       - key: PORT
-        value: 8080
-      - key: DB_HOST
-        fromDatabase:
-          name: trenager-db
-          property: host
-      - key: DB_PORT
-        fromDatabase:
-          name: trenager-db
-          property: port
-      - key: DB_USER
-        fromDatabase:
-          name: trenager-db
-          property: user
-      - key: DB_PASSWORD
-        fromDatabase:
-          name: trenager-db
-          property: password
-      - key: DB_NAME
-        fromDatabase:
-          name: trenager-db
-          property: database
-      - key: DB_SSLMODE
-        value: require
+        value: "10000"
+    healthCheckPath: /health
     plans:
       - name: free
         cpu: 0.25
         memory: 512MB
         maxConcurrentBuilds: 1
-
-  # PostgreSQL database
-  - type: pgsql
-    name: trenager-db
-    plans:
-      - name: free
-        cpu: 0.25
-        memory: 256MB
-        maxConcurrentBuilds: 1
-    ipAllowList: []
-    databases:
-      - name: trenager

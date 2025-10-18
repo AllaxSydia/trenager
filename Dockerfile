@@ -27,7 +27,7 @@ WORKDIR /root/
 # Копируем бэкенд
 COPY --from=backend /app/main .
 
-# Копируем фронтенд (правильный путь!)
+# Копируем фронтенд
 COPY --from=frontend /app/dist ./static
 
 # Проверяем что файлы есть
@@ -37,6 +37,6 @@ RUN ls -la ./static/
 RUN adduser -D -s /bin/sh appuser
 USER appuser
 
-EXPOSE 8080
+EXPOSE 10000
 
 CMD ["./main"]
