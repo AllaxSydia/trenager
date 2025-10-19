@@ -1,13 +1,10 @@
 import axios from 'axios'
 
-// Для разных сред
+// УПРОЩЕННАЯ ФУНКЦИЯ - всегда используем относительные пути
 const getApiBaseUrl = () => {
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL  // из переменной окружения
-  }
-  return import.meta.env.DEV 
-    ? 'http://localhost:8080/api'
-    : 'https://trenager.onrender.com/api'  // ← АБСОЛЮТНЫЙ URL для продакшена
+    // В продакшене и в Docker - всегда относительный путь
+    // Бэкенд и фронтенд в одном контейнере, поэтому /api проксируется на тот же сервер
+    return '/api'
 }
 
 const API_BASE_URL = getApiBaseUrl()
@@ -17,20 +14,20 @@ const api = axios.create({
   timeout: 30000,
 })
 
-// Добавляем логирование для отладки
+// Логирование
 api.interceptors.request.use(config => {
   console.log(`🔄 API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`)
+  console.log(`🌐 Frontend URL: ${window.location.host}`)
+  console.log(`🎯 Full URL: ${config.baseURL}${config.url}`)
   return config
 })
 
+// Обработка ошибок
 api.interceptors.response.use(
-  response => {
-    console.log(`✅ API Response: ${response.status} ${response.config.url}`)
-    return response
-  },
+  response => response,
   error => {
-    console.error(`❌ API Error: ${error.message}`)
-    console.error(`📡 Failed URL: ${error.config?.baseURL}${error.config?.url}`)
+    console.error('🚨 API Error:', error.response?.data || error.message)
+    console.error('🔧 Error config:', error.config)
     return Promise.reject(error)
   }
 )
@@ -48,6 +45,18 @@ export const taskService = {
       language
     })
     return response.data
+  }
+}
+
+// Test connection
+export const testConnection = async () => {
+  try {
+    const response = await api.get('/test')
+    console.log('✅ Connection test:', response.data)
+    return response.data
+  } catch (error) {
+    console.error('❌ Connection test failed:', error)
+    throw error
   }
 }
 

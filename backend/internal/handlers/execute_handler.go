@@ -1,20 +1,16 @@
 package handlers
 
 import (
+	"backend/internal/executor"
 	"backend/internal/models"
 	"backend/internal/services"
-	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"time"
 )
 
 var dockerService *services.DockerService
+var localExecutor *executor.LocalExecutor
 
 func init() {
 	var err error
@@ -25,6 +21,9 @@ func init() {
 	} else {
 		log.Println("✅ Docker service initialized successfully")
 	}
+
+	// Инициализируем локальный исполнитель
+	localExecutor = executor.NewLocalExecutor()
 }
 
 func ExecuteHandler(w http.ResponseWriter, r *http.Request) {
@@ -50,7 +49,7 @@ func ExecuteHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("❌ Docker execution failed: %v", err)
 			log.Println("🔄 Falling back to local execution...")
-			response = executeCodeLocally(req.Code, req.Language)
+			response = executeCodeWithLocalExecutor(req.Code, req.Language)
 		} else {
 			log.Printf("✅ Docker execution successful, output: %s", result.Output)
 			response = models.ExecutionResponse{
@@ -64,77 +63,52 @@ func ExecuteHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		log.Println("🔄 Docker not available, using local execution...")
-		response = executeCodeLocally(req.Code, req.Language)
+		response = executeCodeWithLocalExecutor(req.Code, req.Language)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
 
-func executeCodeLocally(code, language string) models.ExecutionResponse {
-	// Поддерживаем только Go для локального выполнения
-	if language != "go" {
-		return models.ExecutionResponse{
-			Success: false,
-			Message: "Локальное выполнение поддерживает только Go",
-			Output:  "Для выполнения кода на других языках требуется Docker",
-		}
-	}
+// Новая функция использующая LocalExecutor для всех языков
+func executeCodeWithLocalExecutor(code, language string) models.ExecutionResponse {
+	log.Printf("🔧 Executing %s code with local executor", language)
 
-	log.Printf("🔧 Executing Go code locally: %s", code)
+	result, err := localExecutor.Execute(code, language)
 
-	// Создаем временную директорию
-	tmpDir, err := os.MkdirTemp("", "go_exec_*")
 	if err != nil {
+		log.Printf("❌ Local execution error: %v", err)
 		return models.ExecutionResponse{
 			Success: false,
-			Message: fmt.Sprintf("Failed to create temp dir: %v", err),
-			Output:  "",
-		}
-	}
-	defer os.RemoveAll(tmpDir)
-
-	// Создаем файл с кодом
-	filePath := filepath.Join(tmpDir, "main.go")
-	if err := os.WriteFile(filePath, []byte(code), 0644); err != nil {
-		return models.ExecutionResponse{
-			Success: false,
-			Message: fmt.Sprintf("Failed to write code file: %v", err),
+			Message: "Execution failed: " + err.Error(),
 			Output:  "",
 		}
 	}
 
-	log.Printf("📁 Code written to: %s", filePath)
+	// Преобразуем результат из LocalExecutor в models.ExecutionResponse
+	exitCode := result["exitCode"].(int)
+	output := result["output"].(string)
+	errorMsg := result["error"].(string)
 
-	// Выполняем с таймаутом
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	cmd := exec.CommandContext(ctx, "go", "run", filePath)
-	output, err := cmd.CombinedOutput()
-
-	// Обрабатываем результат
-	if ctx.Err() == context.DeadlineExceeded {
-		return models.ExecutionResponse{
-			Success: false,
-			Message: "Execution timeout (30 seconds exceeded)",
-			Output:  "Код выполнялся слишком долго",
+	success := exitCode == 0
+	finalOutput := output
+	if errorMsg != "" {
+		finalOutput = errorMsg
+		if output != "" {
+			finalOutput = output + "\n" + errorMsg
 		}
 	}
 
-	if err != nil {
-		return models.ExecutionResponse{
-			Success: false,
-			Message: fmt.Sprintf("Execution error: %v", err),
-			Output:  string(output),
-		}
+	message := "Код выполнен успешно (локально)"
+	if !success {
+		message = "Ошибка выполнения кода"
 	}
 
-	log.Printf("✅ Local execution successful, output: %s", string(output))
+	log.Printf("✅ Local execution completed, success: %t, output length: %d", success, len(finalOutput))
 
 	return models.ExecutionResponse{
-		Success: true,
-		Message: "Код выполнен успешно (локально)",
-		Output:  string(output),
+		Success: success,
+		Message: message,
+		Output:  finalOutput,
 	}
 }

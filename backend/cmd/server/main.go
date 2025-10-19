@@ -1,42 +1,40 @@
 package main
 
 import (
-	"backend/internal/config"
 	"backend/internal/handlers"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
-	// Загружаем конфигурацию
-	cfg := config.Load()
+	// Получаем порт из переменной окружения или используем 8080
+	port := getPort()
 
-	// Настройка CORS middleware
-	// CORS middleware
+	log.Printf("🚀 Starting server on port %s", port)
+	log.Printf("📁 Current directory: %s", getCurrentDir())
+
+	// Проверяем существование статики
+	if _, err := os.Stat("./static"); err != nil {
+		log.Printf("⚠️ Static directory not found: %v", err)
+	} else {
+		log.Println("✅ Static directory found")
+
+		// Логируем содержимое static
+		files, _ := os.ReadDir("./static")
+		log.Printf("📂 Static files count: %d", len(files))
+		for _, file := range files {
+			log.Printf("   - %s", file.Name())
+		}
+	}
+
+	// Упрощенный CORS middleware
 	corsMiddleware := func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			// Разрешаем конкретные домены
-			origin := r.Header.Get("Origin")
-			allowedOrigins := []string{
-				"https://trenager.onrender.com",
-				"https://tranager.onrender.com",
-				"http://localhost:3000",
-				"http://localhost:5173",
-			}
-
-			// Проверяем разрешен ли origin
-			for _, allowed := range allowedOrigins {
-				if origin == allowed {
-					w.Header().Set("Access-Control-Allow-Origin", origin)
-					break
-				}
-			}
-
+			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
 			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
-			w.Header().Set("Access-Control-Allow-Credentials", "true")
 
-			// Обрабатываем preflight OPTIONS
 			if r.Method == "OPTIONS" {
 				w.WriteHeader(http.StatusOK)
 				return
@@ -65,9 +63,31 @@ func main() {
 		w.Write([]byte(`{"status": "healthy"}`))
 	})
 
-	// Serve frontend static files
+	// Serve frontend static files - ОБНОВЛЕНО ДЛЯ ЕДИНОГО КОНТЕЙНЕРА
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 
-	log.Printf("🚀 Сервер запущен на порту %s", cfg.Server.Port)
-	log.Fatal(http.ListenAndServe(":"+cfg.Server.Port, nil))
+	// Fallback route for SPA - ОБНОВЛЕНО
+	http.HandleFunc("/index.html", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./static/index.html")
+	})
+
+	log.Printf("✅ Server ready to accept requests on port %s", port)
+	log.Printf("🌐 Frontend will be served from /static")
+	log.Fatal(http.ListenAndServe(":"+port, nil))
+}
+
+func getPort() string {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	return port
+}
+
+func getCurrentDir() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "unknown"
+	}
+	return dir
 }

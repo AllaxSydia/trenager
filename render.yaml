@@ -1,15 +1,9 @@
 services:
   - type: web
-    name: trenager
+    name: your-app-name
     env: docker
     docker:
       dockerfile: Dockerfile
     envVars:
       - key: PORT
-        value: "10000"
-    healthCheckPath: /health
-    plans:
-      - name: free
-        cpu: 0.25
-        memory: 512MB
-        maxConcurrentBuilds: 1
+        value: "8080"

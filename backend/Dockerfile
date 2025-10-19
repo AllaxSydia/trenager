@@ -1,25 +1,18 @@
-FROM golang:1.22-alpine
+FROM golang:1.24-alpine
 
 WORKDIR /app
 
-# Устанавливаем зависимости для сборки
-RUN apk add --no-cache gcc musl-dev
-
-# Копируем исходный код
-COPY . .
-
-# Скачиваем зависимости
+# Копируем только нужные файлы
+COPY go.mod go.sum ./
 RUN go mod download
 
-# Собираем приложение
+# После копирования статики
+COPY --from=frontend /app/dist ./static
+RUN ls -la ./static/ && echo "✅ Static files copied"
+
+COPY . .
 RUN go build -o main ./cmd/server
 
-# Создаем непривилегированного пользователя
-RUN adduser -D -s /bin/sh appuser
-USER appuser
-
-# Экспонируем порт
 EXPOSE 8080
 
-# Запускаем приложение
 CMD ["./main"]
