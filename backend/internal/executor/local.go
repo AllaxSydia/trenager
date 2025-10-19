@@ -52,8 +52,22 @@ func (e *LocalExecutor) executeGo(code string) (map[string]interface{}, error) {
 		return nil, fmt.Errorf("failed to write code: %v", err)
 	}
 
+	// Сначала проверяем синтаксис
+	checkCmd := exec.Command("go", "fmt", mainFile)
+	var checkStderr bytes.Buffer
+	checkCmd.Stderr = &checkStderr
+
+	if err := checkCmd.Run(); err != nil {
+		// Если форматирование не удалось, это может быть ошибка синтаксиса
+		return map[string]interface{}{
+			"output":   "",
+			"error":    "Syntax error: " + checkStderr.String(),
+			"exitCode": 1,
+		}, nil
+	}
+
 	// Выполняем с таймаутом
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second) // Увеличили до 45 сек
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, "go", "run", mainFile)
@@ -66,7 +80,7 @@ func (e *LocalExecutor) executeGo(code string) (map[string]interface{}, error) {
 	if ctx.Err() == context.DeadlineExceeded {
 		return map[string]interface{}{
 			"output":   "",
-			"error":    "Execution timeout (30 seconds exceeded)",
+			"error":    "Execution timeout (45 seconds exceeded)",
 			"exitCode": 1,
 		}, nil
 	}
