@@ -52,25 +52,50 @@ func (e *LocalExecutor) executeGo(code string) (map[string]interface{}, error) {
 		return nil, fmt.Errorf("failed to write code: %v", err)
 	}
 
-	// Сначала проверяем синтаксис
-	checkCmd := exec.Command("go", "fmt", mainFile)
-	var checkStderr bytes.Buffer
-	checkCmd.Stderr = &checkStderr
+	// Компилируем статически
+	executable := filepath.Join(tmpDir, "main")
+	compileCmd := exec.Command("go", "build", "-ldflags", "-s -w", "-o", executable, mainFile)
+	var compileStderr bytes.Buffer
+	compileCmd.Stderr = &compileStderr
 
-	if err := checkCmd.Run(); err != nil {
-		// Если форматирование не удалось, это может быть ошибка синтаксиса
+	// Устанавливаем переменные окружения для кросскомпиляции
+	compileCmd.Env = append(os.Environ(),
+		"GOOS=linux",
+		"GOARCH=amd64",
+		"CGO_ENABLED=0",
+	)
+
+	if err := compileCmd.Run(); err != nil {
 		return map[string]interface{}{
 			"output":   "",
-			"error":    "Syntax error: " + checkStderr.String(),
+			"error":    "Compilation failed: " + compileStderr.String(),
 			"exitCode": 1,
 		}, nil
 	}
 
-	// Выполняем с таймаутом
-	ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second) // Увеличили до 45 сек
+	// Проверяем что файл создан
+	if _, err := os.Stat(executable); os.IsNotExist(err) {
+		return map[string]interface{}{
+			"output":   "",
+			"error":    "Executable was not created",
+			"exitCode": 1,
+		}, nil
+	}
+
+	// Делаем файл исполняемым
+	if err := os.Chmod(executable, 0755); err != nil {
+		return map[string]interface{}{
+			"output":   "",
+			"error":    "Failed to make executable: " + err.Error(),
+			"exitCode": 1,
+		}, nil
+	}
+
+	// Выполняем скомпилированную программу
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, "go", "run", mainFile)
+	cmd := exec.CommandContext(ctx, executable)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -80,7 +105,7 @@ func (e *LocalExecutor) executeGo(code string) (map[string]interface{}, error) {
 	if ctx.Err() == context.DeadlineExceeded {
 		return map[string]interface{}{
 			"output":   "",
-			"error":    "Execution timeout (45 seconds exceeded)",
+			"error":    "Execution timeout (10 seconds exceeded)",
 			"exitCode": 1,
 		}, nil
 	}

@@ -1,28 +1,29 @@
 # Backend build stage
-FROM golang:1.24-alpine AS backend
+FROM golang:1.24-alpine as backend
 WORKDIR /app/backend
 COPY backend/ .
 RUN go mod download
 RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/server
 
 # Frontend build stage  
-FROM node:20-alpine AS frontend
+FROM node:20-alpine as frontend
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm ci
 COPY frontend/ .
 RUN npm run build
 
-# Final stage with ALL compilers
+# Final stage with main compilers
 FROM alpine:latest
 
-# Install all compilers and runtimes
-RUN apk --no-cache add \
+# Install main compilers and runtimes
+RUN apk update && apk --no-cache add \
     ca-certificates \
     python3 \
     nodejs \
-    go \
-    g++
+    g++ \
+    # Для Go добавляем необходимые библиотеки
+    libc6-compat
 
 WORKDIR /root/
 
