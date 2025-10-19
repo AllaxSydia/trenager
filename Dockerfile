@@ -13,17 +13,15 @@ RUN npm ci
 COPY frontend/ .
 RUN npm run build
 
-# Final stage with main compilers
+# Final stage - минимальный набор
 FROM alpine:latest
 
-# Install main compilers and runtimes
+# Устанавливаем только Python и Node.js (C++ оставляем т.к. он работает)
 RUN apk update && apk --no-cache add \
     ca-certificates \
     python3 \
     nodejs \
-    g++ \
-    # Для Go добавляем необходимые библиотеки
-    libc6-compat
+    g++
 
 WORKDIR /root/
 

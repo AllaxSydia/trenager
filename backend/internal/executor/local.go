@@ -39,89 +39,11 @@ func (e *LocalExecutor) Execute(code, language string) (map[string]interface{}, 
 }
 
 func (e *LocalExecutor) executeGo(code string) (map[string]interface{}, error) {
-	// Создаем временную директорию
-	tmpDir, err := os.MkdirTemp("", "go_exec_*")
-	if err != nil {
-		return nil, fmt.Errorf("failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
-
-	// Записываем код в файл
-	mainFile := filepath.Join(tmpDir, "main.go")
-	if err := os.WriteFile(mainFile, []byte(code), 0644); err != nil {
-		return nil, fmt.Errorf("failed to write code: %v", err)
-	}
-
-	// Компилируем статически
-	executable := filepath.Join(tmpDir, "main")
-	compileCmd := exec.Command("go", "build", "-ldflags", "-s -w", "-o", executable, mainFile)
-	var compileStderr bytes.Buffer
-	compileCmd.Stderr = &compileStderr
-
-	// Устанавливаем переменные окружения для кросскомпиляции
-	compileCmd.Env = append(os.Environ(),
-		"GOOS=linux",
-		"GOARCH=amd64",
-		"CGO_ENABLED=0",
-	)
-
-	if err := compileCmd.Run(); err != nil {
-		return map[string]interface{}{
-			"output":   "",
-			"error":    "Compilation failed: " + compileStderr.String(),
-			"exitCode": 1,
-		}, nil
-	}
-
-	// Проверяем что файл создан
-	if _, err := os.Stat(executable); os.IsNotExist(err) {
-		return map[string]interface{}{
-			"output":   "",
-			"error":    "Executable was not created",
-			"exitCode": 1,
-		}, nil
-	}
-
-	// Делаем файл исполняемым
-	if err := os.Chmod(executable, 0755); err != nil {
-		return map[string]interface{}{
-			"output":   "",
-			"error":    "Failed to make executable: " + err.Error(),
-			"exitCode": 1,
-		}, nil
-	}
-
-	// Выполняем скомпилированную программу
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	cmd := exec.CommandContext(ctx, executable)
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	err = cmd.Run()
-
-	if ctx.Err() == context.DeadlineExceeded {
-		return map[string]interface{}{
-			"output":   "",
-			"error":    "Execution timeout (10 seconds exceeded)",
-			"exitCode": 1,
-		}, nil
-	}
-
-	if err != nil {
-		return map[string]interface{}{
-			"output":   stdout.String(),
-			"error":    stderr.String(),
-			"exitCode": 1,
-		}, nil
-	}
-
+	// Заглушка для Go - всегда возвращаем сообщение
 	return map[string]interface{}{
-		"output":   stdout.String(),
-		"error":    "",
-		"exitCode": 0,
+		"output":   "",
+		"error":    "Go execution is temporarily disabled. Please use Python, JavaScript or C++ for code execution.",
+		"exitCode": 1,
 	}, nil
 }
 
