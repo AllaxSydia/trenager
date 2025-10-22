@@ -13,16 +13,14 @@ RUN npm ci
 COPY frontend/ .
 RUN npm run build
 
-# Final stage с Docker
-FROM docker:24.0-alpine3.18
+# Final stage - используем базовый Alpine (без Docker)
+FROM alpine:3.18
 
-# Устанавливаем компиляторы
+# Устанавливаем только стабильные языки
 RUN apk update && apk --no-cache add \
     python3 \
     nodejs \
-    go \
-    g++ \
-    openjdk17
+    g++
 
 # Копируем бэкенд
 COPY --from=backend /app/backend/main .
@@ -30,11 +28,5 @@ COPY --from=backend /app/backend/main .
 # Копируем фронтенд
 COPY --from=frontend /app/frontend/dist ./static
 
-# Создаем пользователя для безопасности
-RUN adduser -D -s /bin/sh appuser
-USER appuser
-
 EXPOSE 8080
-
-# Запускаем бэкенд
 CMD ["./main"]
