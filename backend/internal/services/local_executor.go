@@ -24,7 +24,7 @@ func (l *LocalExecutor) ExecuteCode(code, language string) (*models.ExecutionRes
 	}
 
 	// Создаем временную директорию
-	tmpDir, err := os.MkdirTemp("", "go_exec_*")
+	tmpDir, err := os.MkdirTemp("", "go_exec_*") //Создаём временную папку
 	if err != nil {
 		return nil, fmt.Errorf("failed to create temp dir: %v", err)
 	}
@@ -37,8 +37,8 @@ func (l *LocalExecutor) ExecuteCode(code, language string) (*models.ExecutionRes
 	}
 
 	// Выполняем код
-	cmd := exec.Command("go", "run", filePath)
-	output, err := cmd.CombinedOutput()
+	cmd := exec.Command("go", "run", filePath) // Запускает файл main.go (cmd/server)
+	output, err := cmd.CombinedOutput()        // Показывает что получилось
 
 	result := &models.ExecutionResult{
 		Output:  string(output),

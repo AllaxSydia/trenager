@@ -9,8 +9,11 @@ import (
 	"net/http"
 )
 
-var dockerService *services.DockerService
-var localExecutor *executor.LocalExecutor
+// Короче, тут выбираем стратегию выполнения, либо Docker либо Локально
+// потом преобразование результатов в единый формат ответа
+
+var dockerService *services.DockerService // Изоляция
+var localExecutor *executor.LocalExecutor // Быстро
 
 func init() {
 	var err error
@@ -24,6 +27,9 @@ func init() {
 
 	// Инициализируем локальный исполнитель
 	localExecutor = executor.NewLocalExecutor()
+	// Если не получается создать Docker сервис для изолированного выполнения, то
+	// Переходим в локальный режим
+	// Локалка создаётся всегда
 }
 
 func ExecuteHandler(w http.ResponseWriter, r *http.Request) {
@@ -31,7 +37,7 @@ func ExecuteHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, `{"success": false, "message": "Only POST method allowed"}`, http.StatusMethodNotAllowed)
 		return
 	}
-
+	// Парсинг JSON
 	var req models.ExecutionRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, `{"success": false, "message": "Invalid JSON"}`, http.StatusBadRequest)

@@ -9,6 +9,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// База данных
 type Config struct {
 	Host     string
 	Port     string

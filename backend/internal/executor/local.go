@@ -17,6 +17,7 @@ func NewLocalExecutor() *LocalExecutor {
 	return &LocalExecutor{}
 }
 
+// Определяет язык и вызывает соответствующий метод(язык)
 func (e *LocalExecutor) Execute(code, language string) (map[string]interface{}, error) {
 	switch strings.ToLower(language) {
 	case "go":
@@ -38,6 +39,7 @@ func (e *LocalExecutor) Execute(code, language string) (map[string]interface{}, 
 	}
 }
 
+// Не работает
 func (e *LocalExecutor) executeGo(code string) (map[string]interface{}, error) {
 	// Заглушка для Go - всегда возвращаем сообщение
 	return map[string]interface{}{
@@ -47,6 +49,7 @@ func (e *LocalExecutor) executeGo(code string) (map[string]interface{}, error) {
 	}, nil
 }
 
+// Интерпретируемый язык
 func (e *LocalExecutor) executePython(code string) (map[string]interface{}, error) {
 	// Создаем временный файл
 	tmpFile, err := os.CreateTemp("", "python_*.py")
@@ -94,6 +97,7 @@ func (e *LocalExecutor) executePython(code string) (map[string]interface{}, erro
 	}, nil
 }
 
+// Интерпретируемый язык
 func (e *LocalExecutor) executeJavaScript(code string) (map[string]interface{}, error) {
 	// Создаем временный файл
 	tmpFile, err := os.CreateTemp("", "javascript_*.js")
@@ -141,6 +145,7 @@ func (e *LocalExecutor) executeJavaScript(code string) (map[string]interface{}, 
 	}, nil
 }
 
+// Компилируемый
 func (e *LocalExecutor) executeCpp(code string) (map[string]interface{}, error) {
 	// Создаем временную директорию
 	tmpDir, err := os.MkdirTemp("", "cpp_exec_*")

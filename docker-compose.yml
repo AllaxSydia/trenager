@@ -1,7 +1,12 @@
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.railway
     ports:
       - "8080:8080"
     environment:
       - PORT=8080
+    # На Railway это не нужно, но оставляем для локальной разработки
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

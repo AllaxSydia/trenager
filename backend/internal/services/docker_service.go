@@ -18,6 +18,10 @@ import (
 	"github.com/docker/docker/client"
 )
 
+// Docker файл сервиса. Изолятор выполнения кода
+
+// Обертка над Docker API через официальный Go клиент
+// Единственное поле - клиент для взаимодействия с Docker демоном
 type DockerService struct {
 	client *client.Client
 }

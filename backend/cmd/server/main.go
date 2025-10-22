@@ -9,11 +9,12 @@ import (
 
 func main() {
 	// Получаем порт из переменной окружения или используем 8080
-	port := getPort()
+	port := getPort() // для Render
 
 	log.Printf("🚀 Starting server on port %s", port)
 	log.Printf("📁 Current directory: %s", getCurrentDir())
 
+	// Если не static то всё равно запуститься backend, только front не будет
 	// Проверяем существование статики
 	if _, err := os.Stat("./static"); err != nil {
 		log.Printf("⚠️ Static directory not found: %v", err)

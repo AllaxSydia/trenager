@@ -22,10 +22,11 @@ type Config struct {
 	}
 }
 
+// Создаёт и заполняет конфиг при запуске приложения
 func Load() *Config {
 	var cfg Config
 
-	// Server config - Render.com использует переменную PORT
+	// Server config - Render.com использует переменную PORT - ВАЖНО, КРИТ. для деплоя
 	cfg.Server.Port = getEnv("PORT", "8080")
 
 	// Database config
@@ -37,6 +38,8 @@ func Load() *Config {
 	cfg.Database.SSLMode = getEnv("DB_SSLMODE", "disable")
 
 	// Docker config
+	// Нужен для изолированного выполнения кода в контейнерах
+	// Сейчас он не нужен, поскольку используем локальное выполнение
 	cfg.Docker.Host = getEnv("DOCKER_HOST", "unix:///var/run/docker.sock")
 
 	return &cfg
