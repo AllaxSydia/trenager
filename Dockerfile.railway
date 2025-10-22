@@ -13,21 +13,16 @@ RUN npm ci
 COPY frontend/ .
 RUN npm run build
 
-# Final stage - используем образ с Docker!
-FROM docker:24-cli-alpine
+# Final stage с Docker
+FROM docker:24.0-alpine3.18
 
-# Устанавливаем все компиляторы + Docker клиент
+# Устанавливаем компиляторы
 RUN apk update && apk --no-cache add \
     python3 \
     nodejs \
     go \
     g++ \
-    openjdk17-jre \
-    openjdk17 \
-    make
-
-# Устанавливаем Docker Compose (опционально)
-RUN apk add --no-cache docker-compose
+    openjdk17
 
 # Копируем бэкенд
 COPY --from=backend /app/backend/main .
@@ -35,11 +30,9 @@ COPY --from=backend /app/backend/main .
 # Копируем фронтенд
 COPY --from=frontend /app/frontend/dist ./static
 
-# Создаем группу docker и добавляем пользователя
-RUN addgroup -S docker && adduser -S railway -G docker
-
-# Меняем владельца Docker сокета (если доступен)
-USER railway
+# Создаем пользователя для безопасности
+RUN adduser -D -s /bin/sh appuser
+USER appuser
 
 EXPOSE 8080
 
