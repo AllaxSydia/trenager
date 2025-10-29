@@ -8,7 +8,6 @@ restartPolicyType = "ON_FAILURE"
 
 [[services]]
 name = "code-trainer-backend"
-$schema = "https://railway.app/railway.schema.json"
 
 [services.run]
 command = "./main"
@@ -19,21 +18,3 @@ PORT = "8080"
 [services.ports]
 port = 8080
 protocol = "HTTP"
-
-# Для фронтенда (отдельный сервис)
-[[services]]
-name = "code-trainer-frontend"
-$schema = "https://railway.app/railway.schema.json"
-
-[services.build]
-builder = "NIXPACKS"
-
-[services.run]
-command = "cd frontend && npm run build && npx serve -s dist -l 3000"
-
-[services.ports]
-port = 3000
-protocol = "HTTP"
-
-[services.env]
-VITE_API_URL = "https://your-backend-service.up.railway.app/api"
