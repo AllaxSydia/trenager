@@ -24,3 +24,29 @@ type ExecutionResponse struct {
 	Message string `json:"message"`
 	Output  string `json:"output"`
 }
+
+// CheckRequest - запрос на проверку решения
+type CheckRequest struct {
+	TaskID   interface{} `json:"task_id"` // ← принимает и строки и числа
+	Code     string      `json:"code"`
+	Language string      `json:"language"`
+	Tests    []Test      `json:"tests,omitempty"`
+}
+
+// CheckResponse - ответ проверки решения
+type CheckResponse struct {
+	Success  bool   `json:"success"`
+	Passed   bool   `json:"passed"`
+	Output   string `json:"output"`
+	Expected string `json:"expected,omitempty"`
+	Actual   string `json:"actual,omitempty"`
+	Message  string `json:"message"`
+}
+
+// CheckResult - результат проверки
+type CheckResult struct {
+	Passed   bool   `json:"passed"`
+	Expected string `json:"expected"`
+	Actual   string `json:"actual"`
+	Message  string `json:"message"`
+}

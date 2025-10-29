@@ -1,12 +1,31 @@
+version: '3.8'
+
 services:
-  app:
+  frontend:
     build:
-      context: .
-      dockerfile: Dockerfile.railway
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_URL=http://localhost:8080/api
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     environment:
       - PORT=8080
-    # На Railway это не нужно, но оставляем для локальной разработки
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

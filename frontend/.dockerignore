@@ -1,7 +1,9 @@
-.git
-.gitignore
-README.md
-Dockerfile*
-docker-compose*
 node_modules
-*.log
+npm-debug.log
+dist
+.git
+.env
+.DS_Store
+docker-compose.yml
+Dockerfile
+README.md

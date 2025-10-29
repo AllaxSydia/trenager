@@ -1,7 +1,10 @@
-.git
-.gitignore
-README.md
-Dockerfile*
-docker-compose*
+bin
+obj
+*.test
 *.log
-tmp/
+.git
+.env
+.DS_Store
+docker-compose.yml
+Dockerfile
+README.md

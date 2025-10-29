@@ -1,18 +1,28 @@
-FROM node:20-alpine AS builder
+# Frontend Dockerfile
+FROM node:20-alpine
 
 WORKDIR /app
 
-COPY frontend/ .
+# Копируем package files
+COPY package*.json ./
+
+# Устанавливаем зависимости
 RUN npm ci
+
+# Копируем исходный код
+COPY . .
+
+# Собираем приложение
 RUN npm run build
 
+# Используем nginx для раздачи статики
 FROM nginx:alpine
 
 # Копируем собранное приложение
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=0 /app/dist /usr/share/nginx/html
 
-# Копируем конфиг nginx
-COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+# Копируем кастомную конфигурацию nginx (если нужна)
+COPY nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80
 

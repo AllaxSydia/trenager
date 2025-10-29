@@ -1,0 +1,8 @@
+[build]
+builder = "NIXPACKS"
+
+[run]
+command = "npm run build && npx serve -s dist -l 3000"
+
+[env]
+VITE_API_URL = "https://your-backend-service.up.railway.app/api"

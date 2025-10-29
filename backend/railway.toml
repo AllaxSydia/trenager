@@ -1,0 +1,11 @@
+[build]
+builder = "DOCKERFILE"
+
+[deploy]
+numReplicas = 1
+
+[run]
+command = "./main"
+
+[env]
+PORT = "8080"
