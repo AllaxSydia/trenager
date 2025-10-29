@@ -2,6 +2,12 @@ FROM golang:1.24-alpine
 
 WORKDIR /app
 
+# Сначала копируем только mod файлы для лучшего кэширования
+COPY go.mod go.sum ./
+
+# Скачиваем зависимости
+RUN go mod download
+
 # Устанавливаем компиляторы
 RUN apk add --no-cache \
     gcc \
@@ -12,10 +18,6 @@ RUN apk add --no-cache \
     npm \
     openjdk17 \
     openjdk17-jre
-
-# Копируем зависимости
-COPY go.mod go.sum ./
-RUN go mod download
 
 # Копируем исходный код
 COPY . .
