@@ -1,34 +1,32 @@
-# Backend build stage
-FROM golang:1.24-alpine as backend
-WORKDIR /app/backend
-COPY backend/ .
+# Root Dockerfile
+FROM golang:1.24-alpine
+
+WORKDIR /app
+
+# Копируем файлы зависимостей из backend
+COPY backend/go.mod backend/go.sum ./
+
+# Скачиваем зависимости
 RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/server
 
-# Frontend build stage  
-FROM node:20-alpine as frontend
-WORKDIR /app/frontend
-COPY frontend/package*.json ./
-RUN npm ci
-COPY frontend/ .
-RUN npm run build
-
-# Final stage - минимальный набор
-FROM alpine:latest
-
-# Устанавливаем только Python и Node.js (C++ оставляем т.к. он работает)
-RUN apk update && apk --no-cache add \
-    ca-certificates \
+# Устанавливаем компиляторы
+RUN apk add --no-cache \
+    gcc \
+    g++ \
+    musl-dev \
     python3 \
     nodejs \
-    g++
+    npm \
+    openjdk17 \
+    openjdk17-jre
 
-WORKDIR /root/
+# Копируем весь backend исходный код
+COPY backend/ ./
 
-# Copy backend binary
-COPY --from=backend /app/backend/main .
-# Copy frontend static files
-COPY --from=frontend /app/frontend/dist ./static
+# Собираем приложение
+RUN go build -o main ./cmd/server
 
+ENV PORT=8080
 EXPOSE 8080
+
 CMD ["./main"]
