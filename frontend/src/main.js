@@ -1,12 +1,18 @@
-import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 import App from './App.vue'
-import './assets/styles/main.css'
 import router from './router'
 
-const app = createApp(App)
-const pinia = createPinia()
+console.log('🚀 Vue app starting...')
 
-app.use(pinia)
+const app = createApp(App)
 app.use(router)
+
+// Добавьте обработчик ошибок
+app.config.errorHandler = (err, instance, info) => {
+  console.error('Vue error:', err)
+  console.log('Error info:', info)
+}
+
 app.mount('#app')
+
+console.log('✅ Vue app mounted')
