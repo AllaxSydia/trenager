@@ -1,20 +1,12 @@
 [build]
 builder = "DOCKERFILE"
-dockerfilePath = "./backend/Dockerfile"
+dockerfilePath = "./Dockerfile"
 
 [deploy]
 numReplicas = 1
-restartPolicyType = "ON_FAILURE"
 
-[[services]]
-name = "code-trainer-backend"
-
-[services.run]
+[run]
 command = "./main"
 
-[services.env]
+[env]
 PORT = "8080"
-
-[services.ports]
-port = 8080
-protocol = "HTTP"
