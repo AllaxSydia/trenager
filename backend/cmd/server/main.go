@@ -12,49 +12,52 @@ import (
 )
 
 func main() {
-	// Получаем порт из переменной окружения (Railway автоматически устанавливает PORT)
 	port := getPort()
 
 	log.Printf("🚀 Starting server on port %s", port)
 	log.Printf("📁 Current directory: %s", getCurrentDir())
 	log.Printf("🌐 Environment: %s", getEnvironment())
 
-	// Проверяем существование статики (для монолитного деплоя)
+	// Проверяем существование статики
 	if _, err := os.Stat("./static"); err != nil {
-		log.Printf("⚠️ Static directory not found: %v", err)
 		log.Printf("💡 Running in API-only mode")
 	} else {
 		log.Println("✅ Static directory found")
-		files, _ := os.ReadDir("./static")
-		log.Printf("📂 Static files count: %d", len(files))
 	}
 
 	// Production CORS middleware
 	corsMiddleware := func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			// Для production разрешаем запросы с любых источников
-			// В будущем можно ограничить конкретными доменами
+			// Безопасный CORS для production
+			allowedOrigins := getAllowedOrigins()
 			origin := r.Header.Get("Origin")
-			if origin != "" {
-				w.Header().Set("Access-Control-Allow-Origin", origin)
-			} else {
-				w.Header().Set("Access-Control-Allow-Origin", "*")
+
+			// Проверяем разрешенные origins
+			for _, allowed := range allowedOrigins {
+				if origin == allowed {
+					w.Header().Set("Access-Control-Allow-Origin", origin)
+					break
+				}
 			}
+
+			// Если origin не найден в разрешенных, не устанавливаем заголовок
+			// Это безопаснее чем разрешать *
 
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE, PATCH")
 			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, X-API-Key")
 			w.Header().Set("Access-Control-Allow-Credentials", "true")
-			w.Header().Set("Access-Control-Max-Age", "86400") // 24 hours
+			w.Header().Set("Access-Control-Max-Age", "86400")
+
+			// Security headers
+			w.Header().Set("X-Content-Type-Options", "nosniff")
+			w.Header().Set("X-Frame-Options", "DENY")
+			w.Header().Set("X-XSS-Protection", "1; mode=block")
+			w.Header().Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
 
 			if r.Method == "OPTIONS" {
 				w.WriteHeader(http.StatusOK)
 				return
 			}
-
-			// Добавляем security headers для production
-			w.Header().Set("X-Content-Type-Options", "nosniff")
-			w.Header().Set("X-Frame-Options", "DENY")
-			w.Header().Set("X-XSS-Protection", "1; mode=block")
 
 			next(w, r)
 		}
@@ -90,11 +93,12 @@ func main() {
 	http.HandleFunc("/api/test", loggingMiddleware(corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		response := map[string]interface{}{
-			"status":      "ok",
-			"message":     "API is working",
-			"timestamp":   time.Now().Format(time.RFC3339),
-			"version":     "1.0.0",
-			"environment": getEnvironment(),
+			"status":       "ok",
+			"message":      "API is working",
+			"timestamp":    time.Now().Format(time.RFC3339),
+			"version":      "1.0.0",
+			"environment":  getEnvironment(),
+			"frontend_url": getFrontendURL(),
 		}
 		json.NewEncoder(w).Encode(response)
 	})))
@@ -103,18 +107,19 @@ func main() {
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		// Проверяем критичные компоненты
 		healthStatus := "healthy"
-		checks := map[string]string{
-			"api":       "ok",
-			"memory":    "ok",
-			"timestamp": time.Now().Format(time.RFC3339),
+		checks := map[string]interface{}{
+			"api":         "ok",
+			"environment": getEnvironment(),
+			"timestamp":   time.Now().Format(time.RFC3339),
+			"compilers":   []string{"python", "node", "g++", "javac"},
 		}
 
 		response := map[string]interface{}{
 			"status":  healthStatus,
 			"checks":  checks,
 			"version": "1.0.0",
+			"uptime":  time.Since(startTime).String(),
 		}
 
 		json.NewEncoder(w).Encode(response)
@@ -124,11 +129,13 @@ func main() {
 	http.HandleFunc("/api/health", loggingMiddleware(corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		response := map[string]interface{}{
-			"status":      "api_healthy",
-			"timestamp":   time.Now().Format(time.RFC3339),
-			"environment": getEnvironment(),
-			"port":        port,
-			"version":     "1.0.0",
+			"status":       "api_healthy",
+			"timestamp":    time.Now().Format(time.RFC3339),
+			"environment":  getEnvironment(),
+			"port":         port,
+			"version":      "1.0.0",
+			"frontend_url": getFrontendURL(),
+			"compilers":    []string{"python", "node", "g++", "javac"},
 		}
 		json.NewEncoder(w).Encode(response)
 	})))
@@ -137,7 +144,6 @@ func main() {
 	http.HandleFunc("/api/task/", loggingMiddleware(corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		// Парсим параметры из URL
 		path := strings.TrimPrefix(r.URL.Path, "/api/task/")
 		parts := strings.Split(path, "/")
 
@@ -173,6 +179,7 @@ func main() {
 			"defaultCode": getDefaultCode(lang),
 			"supported":   true,
 			"environment": getEnvironment(),
+			"backend_url": getBackendURL(),
 		}
 
 		json.NewEncoder(w).Encode(task)
@@ -195,21 +202,19 @@ func main() {
 			"path":          r.URL.Path,
 			"timestamp":     time.Now().Format(time.RFC3339),
 			"documentation": "Available endpoints: /api/execute, /api/check, /api/task/:lang/:topic/:id",
+			"backend_url":   getBackendURL(),
 		})
 	})))
 
 	log.Printf("✅ Server ready to accept requests on port %s", port)
 	log.Printf("🌐 Environment: %s", getEnvironment())
+	log.Printf("🎯 Frontend URL: %s", getFrontendURL())
 	log.Printf("📡 Available endpoints:")
 	log.Printf("   GET  /health")
 	log.Printf("   GET  /api/health")
 	log.Printf("   POST /api/execute")
 	log.Printf("   POST /api/check")
 	log.Printf("   GET  /api/task/:lang/:topic/:id")
-
-	if _, err := os.Stat("./static"); err == nil {
-		log.Printf("   GET  / (frontend)")
-	}
 
 	// Запускаем сервер
 	server := &http.Server{
@@ -222,11 +227,12 @@ func main() {
 	log.Fatal(server.ListenAndServe())
 }
 
+var startTime = time.Now()
+
 func getPort() string {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
-		log.Printf("ℹ️  PORT environment variable not set, using default: %s", port)
 	}
 	return port
 }
@@ -248,6 +254,32 @@ func getEnvironment() string {
 		}
 	}
 	return env
+}
+
+func getAllowedOrigins() []string {
+	// Безопасный список разрешенных origins для production
+	if getEnvironment() == "production" {
+		return []string{
+			"https://your-frontend-domain.netlify.app", // ЗАМЕНИТЕ на ваш реальный домен
+			"https://trenager-production.up.railway.app",
+		}
+	}
+	// Для development разрешаем все
+	return []string{"*"}
+}
+
+func getFrontendURL() string {
+	if getEnvironment() == "production" {
+		return "https://your-frontend-domain.netlify.app" // ЗАМЕНИТЕ на ваш реальный домен
+	}
+	return "http://localhost:5173"
+}
+
+func getBackendURL() string {
+	if getEnvironment() == "production" {
+		return "https://trenager-production.up.railway.app"
+	}
+	return "http://localhost:8080"
 }
 
 func getDefaultCode(lang string) string {
