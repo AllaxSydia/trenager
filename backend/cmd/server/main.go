@@ -260,7 +260,7 @@ func getAllowedOrigins() []string {
 	// Безопасный список разрешенных origins для production
 	if getEnvironment() == "production" {
 		return []string{
-			"https://your-frontend-domain.netlify.app", // ЗАМЕНИТЕ на ваш реальный домен
+			"https://trenager-frontend.netlify.app", // ВАШ ФРОНТЕНД
 			"https://trenager-production.up.railway.app",
 		}
 	}
@@ -270,7 +270,7 @@ func getAllowedOrigins() []string {
 
 func getFrontendURL() string {
 	if getEnvironment() == "production" {
-		return "https://your-frontend-domain.netlify.app" // ЗАМЕНИТЕ на ваш реальный домен
+		return "https://trenager-frontend.netlify.app" // ВАШ ФРОНТЕНД
 	}
 	return "http://localhost:5173"
 }
