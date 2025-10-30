@@ -3,6 +3,7 @@ FROM golang:1.24-alpine
 
 WORKDIR /app
 
+COPY go.mod go.sum ./
 # Копируем файлы зависимостей из backend
 COPY backend/go.mod backend/go.sum ./
 
