@@ -2,11 +2,15 @@ FROM golang:1.24-alpine
 
 WORKDIR /app
 
-# Копируем mod файлы
-COPY go.mod go.sum ./
+# Копируем workspace файлы
+COPY go.work ./
+COPY go.mod ./
 
-# Скачиваем зависимости
-RUN go mod download
+# Копируем backend модуль
+COPY backend/ ./backend/
+
+# Скачиваем зависимости через workspace
+RUN go work sync
 
 # Устанавливаем компиляторы
 RUN apk add --no-cache \
@@ -19,10 +23,7 @@ RUN apk add --no-cache \
     openjdk17 \
     openjdk17-jre
 
-# Копируем исходный код из backend
-COPY backend/ ./backend/
-
-# Собираем приложение
+# Собираем приложение через workspace
 RUN go build -o main ./backend/cmd/server
 
 ENV PORT=8080
