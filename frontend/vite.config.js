@@ -23,6 +23,7 @@ export default defineConfig({
       external: [] // Убедитесь что здесь пусто
     }
   },
+  base: '/',
   server: {
     fs: {
       allow: ['..']
