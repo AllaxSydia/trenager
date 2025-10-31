@@ -36,13 +36,15 @@
 
         <div class="editor-section">
           <h2>💻 Редактор кода</h2>
-          <MonacoEditor
-            v-model="code"
-            :language="currentLanguage"
-            :theme="editorTheme"
-            @change="onCodeChange"
-            ref="editorRef"
-          />
+          <div class="editor-wrapper">
+            <MonacoEditor
+              v-model="code"
+              :language="currentLanguage"
+              :theme="editorTheme"
+              @change="onCodeChange"
+              ref="editorRef"
+            />
+          </div>
           <div class="editor-actions">
             <button class="btn btn-secondary" @click="toggleTheme">
               {{ editorTheme === 'vs-dark' ? '☀️ Светлая' : '🌙 Тёмная' }}
@@ -219,12 +221,15 @@ const getStatusText = (color) => {
 .task-view {
   min-height: 100vh;
   background: #f8f9fa;
-  padding: 20px;
+  padding: 20px 0; /* ФИКС: убираем горизонтальный padding */
 }
 
+/* ФИКС: Контейнер с жесткими ограничениями */
 .container {
-  max-width: 100vw;
+  max-width: 1400px;
   margin: 0 auto;
+  width: 100%;
+  padding: 0 20px;
 }
 
 .header {
@@ -267,11 +272,14 @@ h1 {
   font-size: 14px;
 }
 
+/* ФИКС: Grid layout с ограничениями */
 .task-layout {
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
   gap: 20px;
   height: calc(100vh - 150px);
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .task-description, .editor-section, .output-section {
@@ -330,9 +338,41 @@ h1 {
   line-height: 1.4;
 }
 
+/* ФИКС: Обертка для редактора с жесткими ограничениями */
+.editor-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  position: relative;
+  flex: 1;
+  min-height: 400px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+}
+
 .editor-section {
   position: relative;
   min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ФИКС: Стили для Monaco Editor */
+:deep(.monaco-editor) {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+:deep(.monaco-editor .overflow-guard) {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+:deep(.monaco-editor .monaco-scrollable-element) {
+  width: 100% !important;
+  max-width: 100% !important;
+  left: 0 !important;
 }
 
 .editor-actions {

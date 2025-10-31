@@ -1,5 +1,5 @@
 <template>
-  <div ref="editorContainer" class="monaco-editor"></div>
+  <div ref="editorContainer" class="monaco-editor-container"></div>
 </template>
 
 <script setup>
@@ -30,7 +30,7 @@ const emit = defineEmits(['update:modelValue', 'change'])
 const editorContainer = ref(null)
 let editor = null
 
-// Маппинг языков
+// Маппинг языков - ФИКС: переместим внутрь компонента
 const languageMap = {
   python: 'python',
   javascript: 'javascript',
@@ -170,7 +170,7 @@ defineExpose({
 </script>
 
 <style scoped>
-.monaco-editor {
+.monaco-editor-container {
   width: 100%;
   height: 100%;
   min-height: 400px;

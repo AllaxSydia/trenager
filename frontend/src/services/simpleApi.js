@@ -12,19 +12,17 @@ export const simpleAPI = {
         language,
         code
       }, {
-        timeout: 30000
+        timeout: 10000 // Уменьшаем таймаут
       })
       
+      console.log('✅ API Response:', response.data)
       return response.data
+      
     } catch (error) {
       console.error('❌ API Request failed:', error.message)
       
-      // Симуляция ответа если сервер недоступен
-      return {
-        success: true,
-        output: `✅ Симуляция выполнения (${language}):\nКод выполнен успешно!\n\nВывод:\nHello World\n---\n⏱ Время выполнения: 0.1s`,
-        error: ''
-      }
+      // ФИКС: Не симулируем успех, а возвращаем ошибку
+      throw new Error(`Бэкенд недоступен: ${error.message}`)
     }
   },
 
@@ -37,19 +35,17 @@ export const simpleAPI = {
         code,
         task_id: taskId
       }, {
-        timeout: 30000
+        timeout: 10000
       })
       
+      console.log('✅ API Check Response:', response.data)
       return response.data
+      
     } catch (error) {
       console.error('❌ API Check request failed:', error.message)
       
-      // Симуляция ответа
-      return {
-        passed: true,
-        output: `✅ Тест пройден! (симуляция)\nЗадача ${taskId} решена правильно!`,
-        error: ''
-      }
+      // ФИКС: Пробрасываем ошибку вместо симуляции
+      throw new Error(`Проверка недоступна: ${error.message}`)
     }
   }
 }

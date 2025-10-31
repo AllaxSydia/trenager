@@ -1,39 +1,32 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* ЖЕСТКИЕ ОГРАНИЧЕНИЯ ДЛЯ MONACO EDITOR */
+.monaco-editor {
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f5f5f5;
-  color: #333;
+.monaco-editor .overflow-guard {
+  width: 100% !important;
+  max-width: 100% !important;
+  position: relative !important;
 }
 
-#app {
-  min-height: 100vh;
+.monaco-editor .monaco-scrollable-element {
+  width: 100% !important;
+  max-width: 100% !important;
+  left: 0 !important;
 }
 
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+/* Принудительное ограничение всех редакторов */
+.monaco-editor-container,
+.editor-container,
+[class*="editor"],
+[class*="Editor"] {
+  max-width: 100% !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
 }
 
-.btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.3s ease;
-}
-
-.btn-primary {
-  background: #007bff;
-  color: white;
-}
-
-.btn-primary:hover {
-  background: #0056b3;
+/* ФИКС: Убираем горизонтальный скролл */
+.monaco-editor .scrollbar.horizontal {
+  display: none !important;
 }

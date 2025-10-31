@@ -1,8 +1,9 @@
 [build]
 builder = "NIXPACKS"
 
-[run]
-command = "npm run build && npx serve -s dist -l 3000"
+[deploy]
+numReplicas = 1
 
 [env]
-VITE_API_URL = "https://your-backend-service.up.railway.app/api"
+VITE_API_URL = "https://trenager-production.up.railway.app/api"
+PORT = "3000"
