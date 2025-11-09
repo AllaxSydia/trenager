@@ -3,23 +3,16 @@ version: '3.8'
 services:
   backend:
     build: 
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
     ports:
       - "8080:8080"
     environment:
-      - ENVIRONMENT=production
+      - ENVIRONMENT=development
       - PORT=8080
-      - RAILWAY_ENVIRONMENT=production
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
       - code_volume:/tmp/code_executor
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   frontend:
     build:

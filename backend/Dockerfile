@@ -1,8 +1,8 @@
-FROM golang:1.21-alpine
+FROM golang:1.24-alpine
 
 WORKDIR /app
 
-# Установка зависимостей для компиляции кода
+# Установка компиляторов
 RUN apk add --no-cache \
     python3 \
     nodejs \
@@ -10,24 +10,25 @@ RUN apk add --no-cache \
     openjdk11 \
     g++ \
     make \
-    git \
-    docker \
-    docker-cli
+    git
 
-# Копируем исходный код
-COPY go.mod go.sum ./
+# Копируем файлы зависимостей ИЗ ПАПКИ backend
+COPY backend/go.mod backend/go.sum ./
+
+# Скачиваем зависимости
 RUN go mod download
 
-COPY . .
+# Копируем весь исходный код бэкенда
+COPY backend/ ./
 
 # Собираем приложение
 RUN go build -o main ./cmd/server
 
-# Устанавливаем Docker клиент
-RUN apk add --no-cache docker-cli
-
-# Создаем пользователя для безопасности
+# Создаем пользователя и настраиваем права
 RUN adduser -D -s /bin/sh appuser
+RUN mkdir -p /tmp/code_executor && \
+    chown appuser:appuser /tmp/code_executor
+
 USER appuser
 
 EXPOSE 8080
