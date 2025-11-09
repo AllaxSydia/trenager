@@ -23,3 +23,9 @@ cd prototip/2
 # Запуск через Docker
 docker-compose up --build
 
+# Запуск проекта локально
+# backend
+go run cmd/server/main.go
+
+# frontend
+npm run dev
