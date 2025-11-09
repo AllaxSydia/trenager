@@ -1,34 +1,60 @@
 <template>
   <div id="app">
-    <div class="app-container">
-      <h1>Code Trainer</h1>
+    <Header v-if="showHeader" />
+    <main class="main-content">
       <router-view />
-    </div>
+    </main>
   </div>
 </template>
 
 <script>
+import Header from '@/components/Header/Header.vue'
+
 export default {
   name: 'App',
-  mounted() {
-    console.log('✅ App.vue mounted')
+  components: {
+    Header
+  },
+  computed: {
+    showHeader() {
+      return this.$route.name !== 'auth'
+    }
   }
 }
 </script>
 
 <style>
-#app {
-  font-family: Arial, sans-serif;
-  padding: 20px;
-  width: 100%;
-  min-height: 100vh;
-  background: #f5f5f5;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* ФИКС: Главный контейнер с ограничением ширины */
-.app-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  width: 100%;
+body {
+  background-color: #0E1117;
+  font-family: Arial, sans-serif;
+}
+
+/* Добавьте эти стили */
+.main-content {
+  margin-top: 96px; /* Высота header для десктопа */
+}
+
+@media (max-width: 1023px) {
+  .main-content {
+    margin-top: 80px; /* Высота header для планшетов */
+  }
+}
+
+@media (max-width: 767px) {
+  .main-content {
+    margin-top: 70px; /* Высота header для мобильных */
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    margin-top: 60px; /* Высота header для маленьких мобильных */
+  }
 }
 </style>

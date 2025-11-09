@@ -1,18 +1,44 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import router from './router'
-
-console.log('🚀 Vue app starting...')
+import router from './router/index'
 
 const app = createApp(App)
-app.use(router)
 
-// Добавьте обработчик ошибок
-app.config.errorHandler = (err, instance, info) => {
-  console.error('Vue error:', err)
-  console.log('Error info:', info)
+// Простой store
+const store = {
+  state: {
+    isLoggedIn: false,
+    username: '',
+    userAvatar: ''
+  },
+  setUser(userData) {
+    this.state.isLoggedIn = userData.isLoggedIn
+    this.state.username = userData.username
+    this.state.userAvatar = userData.userAvatar
+  },
+  logout() {
+    this.state.isLoggedIn = false
+    this.state.username = ''
+    this.state.userAvatar = ''
+  },
+  initialize() {
+    const savedUser = localStorage.getItem('user')
+    if (savedUser) {
+      try {
+        const userData = JSON.parse(savedUser)
+        this.setUser(userData)
+      } catch (e) {
+        localStorage.removeItem('user')
+      }
+    }
+  }
 }
 
-app.mount('#app')
+// Инициализируем store
+store.initialize()
 
-console.log('✅ Vue app mounted')
+// Делаем store глобальным
+app.config.globalProperties.$store = store
+
+app.use(router)
+app.mount('#app')

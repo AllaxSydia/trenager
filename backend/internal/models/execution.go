@@ -14,6 +14,7 @@ type ExecutionResult struct {
 	Error         string        `json:"error,omitempty"` // Текст ошибки (если была)
 	ExecutionTime time.Duration `json:"execution_time"`
 	CreatedAt     time.Time     `json:"created_at"`
+	Inputs        []string      `json:"inputs,omitempty"` // Новое поле для входных данных
 }
 
 // DockerExecutionConfig конфигурация для Docker контейнера

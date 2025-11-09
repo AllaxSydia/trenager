@@ -1,9 +1,0 @@
-[build]
-builder = "NIXPACKS"
-
-[deploy]
-numReplicas = 1
-
-[env]
-VITE_API_URL = "https://trenager-production.up.railway.app/api"
-PORT = "3000"

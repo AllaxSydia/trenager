@@ -1,31 +1,35 @@
 version: '3.8'
 
 services:
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "3000:80"
-    environment:
-      - VITE_API_URL=http://localhost:8080/api
-    depends_on:
-      - backend
-    networks:
-      - app-network
-
   backend:
-    build:
+    build: 
       context: ./backend
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
     environment:
+      - ENVIRONMENT=production
       - PORT=8080
-      - CORS_ALLOWED_ORIGINS=http://localhost:3000
-    networks:
-      - app-network
+      - RAILWAY_ENVIRONMENT=production
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - code_volume:/tmp/code_executor
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-networks:
-  app-network:
-    driver: bridge
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  code_volume:

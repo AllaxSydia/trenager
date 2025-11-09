@@ -2,7 +2,7 @@ FROM golang:1.21-alpine
 
 WORKDIR /app
 
-# Установка зависимостей для компиляции кода
+# Установка компиляторов и интерпретаторов
 RUN apk add --no-cache \
     python3 \
     nodejs \
@@ -10,9 +10,7 @@ RUN apk add --no-cache \
     openjdk11 \
     g++ \
     make \
-    git \
-    docker \
-    docker-cli
+    git
 
 # Копируем исходный код
 COPY go.mod go.sum ./
@@ -22,9 +20,6 @@ COPY . .
 
 # Собираем приложение
 RUN go build -o main ./cmd/server
-
-# Устанавливаем Docker клиент
-RUN apk add --no-cache docker-cli
 
 # Создаем пользователя для безопасности
 RUN adduser -D -s /bin/sh appuser

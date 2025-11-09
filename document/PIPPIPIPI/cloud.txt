@@ -1,0 +1,3 @@
+ssh user1@82.202.136.214
+yes
+Mazay
