@@ -408,7 +408,6 @@ export default {
   background-color: #0E1117;
   color: #E2E8F0;
   padding: 20px;
-  min-height: 100vh;
 }
 
 .course-layout {
@@ -416,7 +415,38 @@ export default {
   grid-template-columns: 340px 1fr;
   gap: 20px;
   align-items: start;
-  min-height: calc(100vh - 40px);
+}
+
+/* Кастомные скроллбары */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1E1E1E;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+  border-radius: 6px;
+  border: 2px solid #1E1E1E;
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #2563EB, #7C3AED);
+  transform: scale(1.05);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(135deg, #1D4ED8, #6D28D9);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3B82F6 #1E1E1E;
 }
 
 .main-content {
@@ -429,36 +459,19 @@ export default {
   gap: 1.5rem;
 }
 
-.no-lesson-selected {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 400px;
-  color: #94A3B8;
+.main-content::-webkit-scrollbar {
+  width: 10px;
 }
 
-.loading-message {
-  text-align: center;
-  padding: 2rem;
+.main-content::-webkit-scrollbar-track {
+  background: #0E1117;
+  border-radius: 6px;
 }
 
-.loading-message h3 {
-  color: #E2E8F0;
-  margin-bottom: 1rem;
-}
-
-.debug-info {
-  margin-top: 2rem;
-  padding: 1rem;
-  background: #1E293B;
-  border-radius: 8px;
-  border: 1px solid #334155;
-  font-size: 0.875rem;
-  text-align: left;
-}
-
-.debug-info p {
-  margin: 0.5rem 0;
+.main-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+  border-radius: 6px;
+  border: 2px solid #0E1117;
 }
 
 @media (max-width: 1024px) {
@@ -469,6 +482,18 @@ export default {
   .main-content {
     overflow-y: visible;
     max-height: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .course-page {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .course-page {
+    padding: 5px;
   }
 }
 </style>

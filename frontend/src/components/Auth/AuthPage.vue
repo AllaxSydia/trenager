@@ -343,7 +343,6 @@ export default {
 </script>
 
 <style scoped>
-/* Основные стили для полного экрана */
 .auth-page {
   height: 100vh;
   width: 100vw;
@@ -389,7 +388,7 @@ export default {
   background: #1F2937;
   border: 1px solid #374151;
   border-radius: 12px;
-  padding: 2.5rem;
+  padding: 1.5rem;
   width: 90%;
   max-width: 400px;
   max-height: 90vh;
@@ -589,7 +588,6 @@ export default {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-top: 1rem;
 }
 
 .auth-submit-btn:hover:not(:disabled) {

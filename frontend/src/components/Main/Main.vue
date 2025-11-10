@@ -1,6 +1,5 @@
 <template>
   <div class="main-page">
-    <!-- УБРАТЬ Header отсюда -->
     
     <main class="main">
       <div class="container">
@@ -80,7 +79,6 @@
 </template>
 
 <script>
-// УБРАТЬ импорт Header отсюда
 export default {
   name: 'MainPage',
   data() {
