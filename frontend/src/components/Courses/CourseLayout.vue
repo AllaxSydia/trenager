@@ -167,18 +167,22 @@ export default {
   },
   mounted() {
     console.log('CourseLayout mounted for language:', this.language)
-    console.log('Initial lessons:', this.lessons)
+    console.log('Initial lessons (raw):', this.lessons)
+    console.log('First lesson (raw):', this.lessons[0])
+    console.log('First lesson tests (raw):', this.lessons[0]?.tests)
+    
+    // Проверим структуру тестов
+    if (this.lessons[0]?.tests) {
+      console.log('First test structure:', this.lessons[0].tests[0])
+      console.log('First test keys:', Object.keys(this.lessons[0].tests[0]))
+    }
     
     this.checkMobile()
     window.addEventListener('resize', this.checkMobile)
     this.checkBackendConnection()
     
-    // Инициализируем internalLessons из пропсов
     this.internalLessons = JSON.parse(JSON.stringify(this.lessons))
     this.ensureLessonSelected()
-  },
-  beforeUnmount() {
-    window.removeEventListener('resize', this.checkMobile)
   },
   methods: {
     ensureLessonSelected() {
@@ -191,15 +195,16 @@ export default {
     },
 
     async checkBackendConnection() {
-      try {
-        const health = await api.healthCheck()
-        if (health.status !== 'healthy') {
-          this.consoleOutput = '⚠️ Бэкенд недоступен. Убедитесь, что сервер запущен на localhost:8080\n'
-        }
-      } catch (error) {
-        this.consoleOutput = '⚠️ Не удалось подключиться к бэкенду\n'
+    try {
+      const health = await api.healthCheck()
+      if (health.status === 'healthy' || health.status === 'api_healthy') {
+        this.consoleOutput += '✅ Все системы работают нормально\n'
       }
-    },
+    } catch (error) {
+      // Не показываем ошибку пользователю при загрузке
+      console.log('Бэкенд недоступен:', error.message)
+    }
+  },
 
     async loadTasksFromAPI() {
       this.isLoading = true
@@ -208,16 +213,25 @@ export default {
         const tasks = await api.getTasks(this.language)
         console.log('Tasks from API:', tasks)
         
-        // ВСЕГДА используем задачи из пропсов, игнорируем задачи из API
+        // ДЕБАГ: посмотрим структуру полученных задач
+        if (tasks && tasks.length > 0) {
+          console.log('First task from API:', tasks[0])
+          console.log('Tests in first task:', tasks[0].tests)
+        }
+        
         this.internalLessons = JSON.parse(JSON.stringify(this.lessons))
         console.log('Using lessons from props:', this.internalLessons)
+        
+        // ДЕБАГ: посмотрим тесты в пропсах
+        if (this.internalLessons && this.internalLessons.length > 0) {
+          console.log('First lesson tests from props:', this.internalLessons[0].tests)
+        }
         
         this.ensureLessonSelected()
         this.updateProgress()
         
       } catch (error) {
         console.error('Failed to load tasks from API:', error)
-        console.log('Не удалось загрузить задачи из API, используем пропсы:', error.message)
         this.internalLessons = JSON.parse(JSON.stringify(this.lessons))
         this.ensureLessonSelected()
         this.updateProgress()
@@ -243,20 +257,84 @@ export default {
       
       console.log('Selecting lesson:', lesson.title)
       
-      if (this.currentLesson?.id === lesson.id) {
-        console.log('Lesson already selected')
-        return
+      // ИСПРАВЛЕННЫЕ тесты с правильными входными данными
+      const hardcodedTests = {
+        'python_1': [{ 
+          input: '', 
+          expected_output: 'Hello, World!' 
+        }],
+        'python_2': [
+          { 
+            input: '5\n3', 
+            expected_output: '8' 
+          },
+          { 
+            input: '10\n20', 
+            expected_output: '30' 
+          },
+          { 
+            input: '-5\n8', 
+            expected_output: '3' 
+          }
+        ],
+        'python_3': [
+          { 
+            input: '5', 
+            expected_output: '120' 
+          },
+          { 
+            input: '3', 
+            expected_output: '6' 
+          },
+          { 
+            input: '1', 
+            expected_output: '1' 
+          }
+        ],
+        'python_4': [
+          { 
+            input: '4', 
+            expected_output: 'чётное' 
+          },
+          { 
+            input: '7', 
+            expected_output: 'нечётное' 
+          }
+        ],
+        'python_5': [
+          { 
+            input: '1\n2\n3', 
+            expected_output: '3' 
+          },
+          { 
+            input: '10\n5\n8', 
+            expected_output: '10' 
+          }
+        ],
+        'javascript_1': [{ 
+          input: '', 
+          expected_output: 'Hello, World!' 
+        }],
+        'javascript_2': [{ 
+          input: '', 
+          expected_output: '8' 
+        }],
       }
+      
+      const testKey = `${this.language}_${lesson.id}`
+      const tests = hardcodedTests[testKey] || []
       
       this.currentLesson = { 
         ...lesson,
-        tests: lesson.tests ? lesson.tests.map(test => ({ 
+        tests: tests.map(test => ({ 
           ...test,
           status: null,
           actual: null,
           error: null
-        })) : []
+        }))
       }
+      
+      console.log('Current lesson with tests:', this.currentLesson)
       
       this.userCode = lesson.starterCode || ''
       this.consoleInput = ''
@@ -324,37 +402,53 @@ export default {
         test.status = 'running'
         
         try {
-          const inputs = this.consoleInput.trim() ? [this.consoleInput] : []
-          
-          const result = await api.checkSolution({
-            task_id: this.currentLesson.id.toString(),
-            code: this.userCode,
-            language: this.language,
-            inputs: inputs
-          })
-          
-          if (result.success && result.passed) {
-            test.status = 'passed'
-            test.actual = result.actual || 'Тест пройден'
-            passedCount++
-          } else {
-            test.status = 'failed'
-            test.actual = result.actual || 'Тест не пройден'
-            test.error = result.message || 'Ошибка выполнения'
+          // РАЗБИВАЕМ input на массив строк если есть \n
+          let inputs = []
+          if (test.input && test.input.trim() !== '') {
+            inputs = test.input.split('\n').filter(line => line.trim() !== '')
           }
           
-          this.consoleOutput += `Тест ${i + 1}: ${test.status === 'passed' ? '✅' : '❌'} ${test.input || 'без ввода'}\n`
+          const result = await api.executeCode({
+            code: this.userCode,
+            language: this.language,
+            inputs: inputs // ← передаем массив строк
+          })
+          
+          const output = result.output || ''
+          const expected = test.expected_output || ''
+          
+          const testPassed = output.trim() === expected.trim()
+          
+          if (testPassed) {
+            test.status = 'passed'
+            passedCount++
+            this.consoleOutput += `✅ Тест ${i + 1}: Пройден\n`
+            if (output) {
+              this.consoleOutput += `   Вывод: "${output}"\n`
+            }
+            this.consoleOutput += '\n'
+          } else {
+            test.status = 'failed'
+            this.consoleOutput += `❌ Тест ${i + 1}: Не пройден\n`
+            this.consoleOutput += `   Ожидалось: "${expected}"\n`
+            this.consoleOutput += `   Получено:  "${output}"\n\n`
+          }
           
         } catch (error) {
           test.status = 'failed'
-          test.error = `Ошибка: ${error.message}`
-          this.consoleOutput += `Тест ${i + 1}: ❌ Ошибка выполнения\n`
+          this.consoleOutput += `❌ Тест ${i + 1}: Ошибка выполнения\n`
+          this.consoleOutput += `   Ошибка: ${error.message}\n\n`
         }
         
-        await new Promise(resolve => setTimeout(resolve, 300))
+        await new Promise(resolve => setTimeout(resolve, 500))
       }
       
-      this.consoleOutput += `\n📊 Результат: ${passedCount}/${this.currentLesson.tests.length} тестов пройдено\n`
+      this.consoleOutput += `📊 Итог: ${passedCount}/${this.currentLesson.tests.length} тестов пройдено\n`
+      
+      if (passedCount === this.currentLesson.tests.length) {
+        this.consoleOutput += '🎉 Отлично! Все тесты пройдены!\n'
+      }
+      
       this.isTesting = false
     },
 
@@ -362,21 +456,22 @@ export default {
       if (!this.currentLesson) return
       
       this.isSubmitting = true
-      this.consoleOutput = '📤 Отправка решения...\n\n'
+      this.consoleOutput = '📤 Проверка решения...\n\n'
       
       await this.runTests()
       
-      const allPassed = this.passedTests === this.currentLesson.tests.length
+      const allPassed = this.currentLesson.tests.every(test => test.status === 'passed')
       
       if (allPassed) {
+        // Отмечаем урок как пройденный
         const lessonIndex = this.internalLessons.findIndex(l => l.id === this.currentLesson.id)
         if (lessonIndex !== -1) {
           this.internalLessons[lessonIndex].completed = true
           this.updateProgress()
         }
-        this.consoleOutput += '\n🎉 Поздравляем! Все тесты пройдены! Решение принято.\n'
+        this.consoleOutput += '\n🎉 Поздравляем! Все тесты пройдены! Задача решена правильно.\n'
       } else {
-        this.consoleOutput += '\n❌ Не все тесты пройдены. Продолжайте работать!\n'
+        this.consoleOutput += '\n❌ Не все тесты пройдены. Продолжайте работать над решением!\n'
       }
       
       this.isSubmitting = false

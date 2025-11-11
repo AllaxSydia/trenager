@@ -26,28 +26,118 @@ var tasks = map[string]models.Task{
 	"python_2": {
 		ID:          "2",
 		Title:       "Сумма двух чисел",
-		Description: "Напишите программу которая складывает два числа (5 и 3)",
+		Description: "Напишите программу которая принимает два числа через input() и выводит их сумму",
 		Language:    "python",
 		Difficulty:  "easy",
-		Template:    "# Сложите два числа\nnum1 = 5\nnum2 = 3\nresult = num1 + num2\nprint(result)",
+		Template: `# Введите два числа и выведите их сумму
+		num1 = int(input())
+		num2 = int(input())
+		print(num1 + num2)`,
 		Tests: []models.Test{
 			{
-				Input:          "",
+				Input:          "5\n3",
 				ExpectedOutput: "8",
+			},
+			{
+				Input:          "10\n20",
+				ExpectedOutput: "30",
+			},
+			{
+				Input:          "-5\n8",
+				ExpectedOutput: "3",
 			},
 		},
 	},
 	"python_3": {
 		ID:          "3",
-		Title:       "Факториал",
-		Description: "Напишите программу которая вычисляет факториал числа 5",
+		Title:       "Факториал числа",
+		Description: "Напишите программу которая принимает число через input() и вычисляет его факториал",
 		Language:    "python",
 		Difficulty:  "medium",
-		Template:    "# Вычислите факториал числа 5\nn = 5\nfactorial = 1\nfor i in range(1, n + 1):\n    factorial *= i\nprint(factorial)",
+		Template: `# Вычислите факториал введенного числа
+		n = int(input())
+		factorial = 1
+		for i in range(1, n + 1):
+			factorial *= i
+		print(factorial)`,
 		Tests: []models.Test{
 			{
-				Input:          "",
+				Input:          "5",
 				ExpectedOutput: "120",
+			},
+			{
+				Input:          "3",
+				ExpectedOutput: "6",
+			},
+			{
+				Input:          "1",
+				ExpectedOutput: "1",
+			},
+		},
+	},
+	"python_4": {
+		ID:          "4",
+		Title:       "Проверка на чётность",
+		Description: "Напишите программу которая принимает число и выводит 'чётное' если число чётное, 'нечётное' если нечётное",
+		Language:    "python",
+		Difficulty:  "easy",
+		Template: `# Проверьте чётность числа
+		num = int(input())
+		if num % 2 == 0:
+			print("чётное")
+		else:
+			print("нечётное")`,
+		Tests: []models.Test{
+			{
+				Input:          "4",
+				ExpectedOutput: "чётное",
+			},
+			{
+				Input:          "7",
+				ExpectedOutput: "нечётное",
+			},
+			{
+				Input:          "0",
+				ExpectedOutput: "чётное",
+			},
+			{
+				Input:          "-3",
+				ExpectedOutput: "нечётное",
+			},
+		},
+	},
+	"python_5": {
+		ID:          "5",
+		Title:       "Поиск максимума",
+		Description: "Напишите программу которая принимает три числа и выводит наибольшее из них",
+		Language:    "python",
+		Difficulty:  "medium",
+		Template: `# Найдите максимальное из трёх чисел
+		a = int(input())
+		b = int(input()) 
+		c = int(input())
+		max_num = a
+		if b > max_num:
+			max_num = b
+		if c > max_num:
+			max_num = c
+		print(max_num)`,
+		Tests: []models.Test{
+			{
+				Input:          "1\n2\n3",
+				ExpectedOutput: "3",
+			},
+			{
+				Input:          "10\n5\n8",
+				ExpectedOutput: "10",
+			},
+			{
+				Input:          "-5\n-2\n-10",
+				ExpectedOutput: "-2",
+			},
+			{
+				Input:          "7\n7\n7",
+				ExpectedOutput: "7",
 			},
 		},
 	},
@@ -91,7 +181,7 @@ func TasksHandler(w http.ResponseWriter, r *http.Request) {
 	language := r.URL.Query().Get("lang")
 	taskID := r.URL.Query().Get("id")
 
-	// Если указаны язык и ID - возвращаем конкретную задачу
+	// Если указаны язык и ID - возвращаем конкретную задачу с тестами
 	if language != "" && taskID != "" {
 		key := language + "_" + taskID
 		if task, exists := tasks[key]; exists {
@@ -104,7 +194,7 @@ func TasksHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Если указан только язык - возвращаем все задачи для этого языка
+	// Если указан только язык - возвращаем все задачи для этого языка с тестами
 	if language != "" {
 		var languageTasks []models.Task
 		for key, task := range tasks {
@@ -117,7 +207,7 @@ func TasksHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Если параметров нет - возвращаем все задачи (без тестов для безопасности)
+	// Если параметров нет - возвращаем все задачи (без тестов или с тестами)
 	var publicTasks []models.Task
 	for _, task := range tasks {
 		publicTasks = append(publicTasks, models.Task{
@@ -127,7 +217,7 @@ func TasksHandler(w http.ResponseWriter, r *http.Request) {
 			Language:    task.Language,
 			Difficulty:  task.Difficulty,
 			Template:    task.Template,
-			// Tests не включаем для безопасности
+			// Tests: task.Tests, // Раскомментируйте если хотите возвращать тесты
 		})
 	}
 
