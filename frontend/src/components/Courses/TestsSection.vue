@@ -1,45 +1,52 @@
 <template>
-  <section class="tests-section">
-    <div class="tests-header">
-      <h3>Тесты</h3>
-      <div class="tests-summary">
-        <span class="tests-passed">Пройдено: {{ passedTests }}/{{ tests.length }}</span>
-      </div>
+  <div class="tests-section">
+    <h3>Тесты</h3>
+    
+    <div v-if="tests.length === 0" class="no-tests">
+      Для этой задачи нет тестов
     </div>
-    <div class="tests-list">
+
+    <div v-else class="tests-list">
       <div 
         v-for="(test, index) in tests" 
-        :key="index"
+        :key="index" 
         class="test-item"
-        :class="{
-          'test-item--passed': test.status === 'passed',
-          'test-item--failed': test.status === 'failed',
-          'test-item--running': test.status === 'running'
+        :class="{ 
+          'passed': test.status === 'passed', 
+          'failed': test.status === 'failed',
+          'running': test.status === 'running'
         }"
       >
-        <div class="test-icon">
-          <span v-if="test.status === 'passed'">✓</span>
-          <span v-else-if="test.status === 'failed'">✗</span>
-          <span v-else-if="test.status === 'running'">⏳</span>
-          <span v-else>○</span>
+        <div class="test-header">
+          <span class="test-number">Тест {{ index + 1 }}</span>
+          <span class="test-status">
+            <span v-if="test.status === 'passed'">✅</span>
+            <span v-else-if="test.status === 'failed'">❌</span>
+            <span v-else-if="test.status === 'running'">⏳</span>
+            <span v-else>⏸️</span>
+          </span>
         </div>
-        <div class="test-content">
-          <div class="test-input">
-            <strong>Вход:</strong> {{ test.input }}
+
+        <div class="test-details">
+          <div class="test-input" v-if="test.input">
+            <strong>Вход:</strong> {{ test.input.replace(/\n/g, '   ') }}
           </div>
+          
           <div class="test-expected">
-            <strong>Ожидается:</strong> {{ test.expected }}
+            <strong>Ожидается:</strong> {{ test.expected_output }}
           </div>
-          <div v-if="test.actual" class="test-actual">
+
+          <div class="test-actual" v-if="test.status === 'failed' && test.actual">
             <strong>Получено:</strong> {{ test.actual }}
           </div>
-          <div v-if="test.error" class="test-error">
+
+          <div class="test-error" v-if="test.status === 'failed' && test.error">
             <strong>Ошибка:</strong> {{ test.error }}
           </div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
 </template>
 
 <script>

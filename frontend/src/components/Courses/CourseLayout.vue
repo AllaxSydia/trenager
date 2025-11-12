@@ -402,42 +402,33 @@ export default {
         test.status = 'running'
         
         try {
-          // РАЗБИВАЕМ input на массив строк если есть \n
-          let inputs = []
-          if (test.input && test.input.trim() !== '') {
-            inputs = test.input.split('\n').filter(line => line.trim() !== '')
-          }
-          
           const result = await api.executeCode({
             code: this.userCode,
             language: this.language,
-            inputs: inputs // ← передаем массив строк
+            inputs: test.input ? test.input.split('\n') : []
           })
           
           const output = result.output || ''
           const expected = test.expected_output || ''
           
-          const testPassed = output.trim() === expected.trim()
+          // Сохраняем фактический вывод для отображения в тестах
+          test.actual = output.trim()
+          
+          const testPassed = test.actual === expected.trim()
           
           if (testPassed) {
             test.status = 'passed'
             passedCount++
             this.consoleOutput += `✅ Тест ${i + 1}: Пройден\n`
-            if (output) {
-              this.consoleOutput += `   Вывод: "${output}"\n`
-            }
-            this.consoleOutput += '\n'
           } else {
             test.status = 'failed'
             this.consoleOutput += `❌ Тест ${i + 1}: Не пройден\n`
-            this.consoleOutput += `   Ожидалось: "${expected}"\n`
-            this.consoleOutput += `   Получено:  "${output}"\n\n`
           }
           
         } catch (error) {
           test.status = 'failed'
+          test.error = error.message
           this.consoleOutput += `❌ Тест ${i + 1}: Ошибка выполнения\n`
-          this.consoleOutput += `   Ошибка: ${error.message}\n\n`
         }
         
         await new Promise(resolve => setTimeout(resolve, 500))
