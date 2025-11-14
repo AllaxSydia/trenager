@@ -1,81 +1,116 @@
 package services
 
 import (
-	"crypto/rand"
-	"encoding/hex"
+	"database/sql"
 	"errors"
+	"os"
 	"time"
 
 	"backend/internal/models"
+
+	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/crypto/bcrypt"
 )
 
-// AuthService сервис для аутентификации
 type AuthService struct {
-	// Временное хранилище в памяти (позже заменим на БД)
-	users  map[string]*models.User
-	tokens map[string]string // token -> userID
+	db *sql.DB
 }
 
-func NewAuthService() *AuthService {
-	return &AuthService{
-		users:  make(map[string]*models.User),
-		tokens: make(map[string]string),
+func NewAuthService(db *sql.DB) *AuthService {
+	return &AuthService{db: db}
+}
+
+func (s *AuthService) Register(username, email, password string) (*models.User, string, error) {
+	// Проверка на существующего пользователя
+	var exists bool
+	err := s.db.QueryRow(
+		"SELECT EXISTS(SELECT 1 FROM users WHERE email=$1 OR username=$2)",
+		email, username,
+	).Scan(&exists)
+	if err != nil {
+		return nil, "", err
 	}
-}
+	if exists {
+		return nil, "", errors.New("user already exists with given email or username")
+	}
 
-// GuestLogin создает гостевую сессию
-func (s *AuthService) GuestLogin() (*models.User, string, error) {
-	guestID := "guest-" + generateRandomID(8)
+	// Хеширование пароля
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, "", err
+	}
+
+	now := time.Now().UTC()
+	var id int64
+
+	err = s.db.QueryRow(
+		`INSERT INTO users (username, email, password_hash, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+		username, email, string(hash), now, now,
+	).Scan(&id)
+	if err != nil {
+		return nil, "", err
+	}
 
 	user := &models.User{
-		ID:        guestID,
-		Username:  "Гость_" + generateRandomID(4),
-		Email:     "guest@" + generateRandomID(6) + ".com",
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		ID:        id,
+		Username:  username,
+		Email:     email,
+		CreatedAt: now,
+		UpdatedAt: now,
 	}
 
-	// Сохраняем пользователя
-	s.users[user.ID] = user
-
-	// Создаем токен
-	token := generateRandomID(32)
-	s.tokens[token] = user.ID
+	token, err := generateJWT(user.ID, user.Username)
+	if err != nil {
+		return nil, "", err
+	}
 
 	return user, token, nil
 }
 
-// ValidateToken проверяет валидность токена
-func (s *AuthService) ValidateToken(token string) (*models.User, error) {
-	userID, exists := s.tokens[token]
-	if !exists {
-		return nil, errors.New("invalid token")
+func (s *AuthService) Login(emailOrUsername, password string) (*models.User, string, error) {
+	var user models.User
+	var passwordHash string
+
+	err := s.db.QueryRow(
+		`SELECT id, username, email, password_hash, created_at, updated_at
+		FROM users WHERE email=$1 OR username=$1`,
+		emailOrUsername,
+	).Scan(&user.ID, &user.Username, &user.Email, &passwordHash, &user.CreatedAt, &user.UpdatedAt)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, "", errors.New("invalid credentials")
+		}
+		return nil, "", err
 	}
 
-	user, exists := s.users[userID]
-	if !exists {
-		return nil, errors.New("user not found")
+	// Сравнение пароля
+	if err := bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(password)); err != nil {
+		return nil, "", errors.New("invalid credentials")
 	}
 
-	return user, nil
-}
-
-// Register регистрирует нового пользователя (заглушка)
-func (s *AuthService) Register(username, email, password string) (*models.User, string, error) {
-	return nil, "", errors.New("registration temporarily disabled")
-}
-
-// Login аутентифицирует пользователя (заглушка)
-func (s *AuthService) Login(email, password string) (*models.User, string, error) {
-	return nil, "", errors.New("login temporarily disabled")
-}
-
-// generateRandomID генерирует случайную строку
-func generateRandomID(length int) string {
-	bytes := make([]byte, length)
-	if _, err := rand.Read(bytes); err != nil {
-		// Fallback на timestamp если crypto недоступен
-		return string(time.Now().UnixNano())
+	token, err := generateJWT(user.ID, user.Username)
+	if err != nil {
+		return nil, "", err
 	}
-	return hex.EncodeToString(bytes)
+
+	return &user, token, nil
+}
+
+func generateJWT(userID int64, username string) (string, error) {
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		secret = "dev-secret-change-me-in-production"
+	}
+
+	claims := jwt.MapClaims{
+		"sub":  userID,
+		"name": username,
+		"iat":  time.Now().Unix(),
+		"exp":  time.Now().Add(72 * time.Hour).Unix(),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(secret))
 }

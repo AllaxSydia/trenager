@@ -1,6 +1,7 @@
 package main
 
 import (
+	"backend/internal/database"
 	"backend/internal/handlers"
 	"encoding/json"
 	"fmt"
@@ -12,6 +13,9 @@ import (
 )
 
 func main() {
+	database.Init()
+	defer database.Close()
+
 	port := getPort()
 
 	log.Printf("🚀 Starting server on port %s", port)
@@ -88,6 +92,7 @@ func main() {
 	http.HandleFunc("/api/auth/login", loggingMiddleware(corsMiddleware(handlers.LoginHandler)))
 	http.HandleFunc("/api/auth/guest", loggingMiddleware(corsMiddleware(handlers.GuestAuthHandler)))
 	http.HandleFunc("/api/auth/register", loggingMiddleware(corsMiddleware(handlers.RegisterHandler)))
+	http.HandleFunc("/api/auth/profile", loggingMiddleware(corsMiddleware(handlers.AuthMiddleware(handlers.ProfileHandler))))
 
 	// Test endpoint
 	http.HandleFunc("/api/test", loggingMiddleware(corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
