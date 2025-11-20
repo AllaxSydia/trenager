@@ -1,0 +1,154 @@
+Отчёт по поводу заливки сайта на сервер.
+
+Проблема:
+Хостинг-провайдер блокирует все входящие подключения на ваш VPS. Это частая практика у российских провайдеров для недорогих тарифов. 
+
+Порты: 
+
+
+Логи запущенного сервера (docker)
+
+user1@vm-1330f819c:~/trenager$ docker-compose ps
+       Name                      Command               State                    Ports
+-------------------------------------------------------------------------------------------------------
+trenager_backend_1    ./main                           Up      0.0.0.0:3000->8080/tcp,:::3000->8080/tcp
+trenager_frontend_1   /docker-entrypoint.sh ngin ...   Up      0.0.0.0:3001->80/tcp,:::3001->80/tcp
+user1@vm-1330f819c:~/trenager$ docker-compose logs -f
+Attaching to trenager_frontend_1, trenager_backend_1
+backend_1   | 2025/11/09 16:07:37 🔄 Running in local execution mode
+backend_1   | 2025/11/09 16:07:37 🚀 Starting server on port 8080
+backend_1   | 2025/11/09 16:07:37 📁 Current directory: /app
+backend_1   | 2025/11/09 16:07:37 🌐 Environment: development
+backend_1   | 2025/11/09 16:07:37 💡 Running in API-only mode
+backend_1   | 2025/11/09 16:07:37 ✅ Server ready to accept requests on port 8080
+backend_1   | 2025/11/09 16:07:37 🌐 Environment: development
+backend_1   | 2025/11/09 16:07:37 🎯 Frontend URL: http://localhost:5173
+backend_1   | 2025/11/09 16:07:37 📡 Available endpoints:
+backend_1   | 2025/11/09 16:07:37    GET  /health
+backend_1   | 2025/11/09 16:07:37    GET  /api/health
+backend_1   | 2025/11/09 16:07:37    POST /api/execute
+backend_1   | 2025/11/09 16:07:37    POST /api/check
+backend_1   | 2025/11/09 16:07:37    GET  /api/task/:lang/:topic/:id
+frontend_1  | /docker-entrypoint.sh: /docker-entrypoint.d/ is not empty, will attempt to perform configuration
+frontend_1  | /docker-entrypoint.sh: Looking for shell scripts in /docker-entrypoint.d/
+frontend_1  | /docker-entrypoint.sh: Launching /docker-entrypoint.d/10-listen-on-ipv6-by-default.sh
+frontend_1  | 10-listen-on-ipv6-by-default.sh: info: Getting the checksum of /etc/nginx/conf.d/default.conf
+frontend_1  | 10-listen-on-ipv6-by-default.sh: info: Enabled listen on IPv6 in /etc/nginx/conf.d/default.conf
+frontend_1  | /docker-entrypoint.sh: Sourcing /docker-entrypoint.d/15-local-resolvers.envsh
+frontend_1  | /docker-entrypoint.sh: Launching /docker-entrypoint.d/20-envsubst-on-templates.sh
+frontend_1  | /docker-entrypoint.sh: Launching /docker-entrypoint.d/30-tune-worker-processes.sh
+frontend_1  | /docker-entrypoint.sh: Configuration complete; ready for start up
+frontend_1  | 172.18.0.1 - - [09/Nov/2025:16:07:50 +0000] "GET / HTTP/1.1" 200 637 "-" "curl/7.81.0"
+user1@vm-1330f819c:~/trenager$ curl http://localhost:3001
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeForge</title>
+    <!--<script src="https://cdn.tailwindcss.com"></script>-->
+    <!-- В index.html -->
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>-->
+    <script type="module" crossorigin src="/assets/index-CmoDrWOV.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BAgENYv2.css">
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+</html>
+user1@vm-1330f819c:~/trenager$ curl http://localhost:3000/health
+{"checks":{"api":"ok","compilers":["python","node","g++","javac"],"environment":"development","timestamp":"2025-11-09T16:16:45Z"},"status":"healthy","uptime":"9m7.907302382s","version":"1.0.0"}
+user1@vm-1330f819c:~/trenager$ ip addr show
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host
+       valid_lft forever preferred_lft forever
+2: enp3s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether fa:16:3e:a7:ee:06 brd ff:ff:ff:ff:ff:ff
+    inet 82.202.136.214/21 metric 100 brd 82.202.143.255 scope global dynamic enp3s0
+       valid_lft 25312sec preferred_lft 25312sec
+    inet6 fe80::f816:3eff:fea7:ee06/64 scope link
+       valid_lft forever preferred_lft forever
+3: docker0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default
+    link/ether a2:e0:b4:5f:28:9b brd ff:ff:ff:ff:ff:ff
+    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::a0e0:b4ff:fe5f:289b/64 scope link
+       valid_lft forever preferred_lft forever
+27: br-83c36012200b: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default
+    link/ether 0a:5c:d7:9e:92:02 brd ff:ff:ff:ff:ff:ff
+    inet 172.18.0.1/16 brd 172.18.255.255 scope global br-83c36012200b
+       valid_lft forever preferred_lft forever
+    inet6 fe80::85c:d7ff:fe9e:9202/64 scope link
+       valid_lft forever preferred_lft forever
+28: veth86f833c@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master br-83c36012200b state UP group default
+    link/ether c6:a9:08:99:65:f9 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+    inet6 fe80::c4a9:8ff:fe99:65f9/64 scope link
+       valid_lft forever preferred_lft forever
+29: vethf78106d@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master br-83c36012200b state UP group default
+    link/ether be:a2:b7:c7:ca:2b brd ff:ff:ff:ff:ff:ff link-netnsid 1
+    inet6 fe80::bca2:b7ff:fec7:ca2b/64 scope link
+       valid_lft forever preferred_lft forever
+
+user1@vm-1330f819c:~/trenager$ docker-compose down
+Stopping trenager_frontend_1 ... done
+Stopping trenager_backend_1  ... done
+Removing trenager_frontend_1 ... done
+Removing trenager_backend_1  ... done
+Removing network trenager_default
+^[[Auser1@vm-1330f819c:~/trenager$ docker-compose up -d -p 8080
+Builds, (re)creates, starts, and attaches to containers for a service.
+
+Unless they are already running, this command also starts any linked services.
+
+The `docker-compose up` command aggregates the output of each container. When
+the command exits, all containers are stopped. Running `docker-compose up -d`
+starts the containers in the background and leaves them running.
+
+If there are existing containers for a service, and the service's configuration
+or image was changed after the container's creation, `docker-compose up` picks
+up the changes by stopping and recreating the containers (preserving mounted
+volumes). To prevent Compose from picking up changes, use the `--no-recreate`
+flag.
+
+If you want to force Compose to stop and recreate all containers, use the
+`--force-recreate` flag.
+
+Usage: up [options] [--scale SERVICE=NUM...] [--] [SERVICE...]
+
+Options:
+    -d, --detach               Detached mode: Run containers in the background,
+                               print new container names. Incompatible with
+                               --abort-on-container-exit.
+    --no-color                 Produce monochrome output.
+    --quiet-pull               Pull without printing progress information
+    --no-deps                  Don't start linked services.
+    --force-recreate           Recreate containers even if their configuration
+                               and image haven't changed.
+    --always-recreate-deps     Recreate dependent containers.
+                               Incompatible with --no-recreate.
+    --no-recreate              If containers already exist, don't recreate
+                               them. Incompatible with --force-recreate and -V.
+    --no-build                 Don't build an image, even if it's missing.
+    --no-start                 Don't start the services after creating them.
+    --build                    Build images before starting containers.
+    --abort-on-container-exit  Stops all containers if any container was
+                               stopped. Incompatible with -d.
+    --attach-dependencies      Attach to dependent containers.
+    -t, --timeout TIMEOUT      Use this timeout in seconds for container
+                               shutdown when attached or when containers are
+                               already running. (default: 10)
+    -V, --renew-anon-volumes   Recreate anonymous volumes instead of retrieving
+                               data from the previous containers.
+    --remove-orphans           Remove containers for services not defined
+                               in the Compose file.
+    --exit-code-from SERVICE   Return the exit code of the selected service
+                               container. Implies --abort-on-container-exit.
+    --scale SERVICE=NUM        Scale SERVICE to NUM instances. Overrides the
+                               `scale` setting in the Compose file if present.
+    --no-log-prefix            Don't print prefix in logs.
+
+нужно решить вопрос по поводу VPS

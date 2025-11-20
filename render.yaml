@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: your-app-name
+    env: docker
+    docker:
+      dockerfile: Dockerfile
+    envVars:
+      - key: PORT
+        value: "8080"

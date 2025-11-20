@@ -1,0 +1,32 @@
+# Backend build stage
+FROM golang:1.24-alpine as backend
+WORKDIR /app/backend
+COPY backend/ .
+RUN go mod download
+RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/server
+
+# Frontend build stage  
+FROM node:20-alpine as frontend
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm ci
+COPY frontend/ .
+RUN npm run build
+
+# Final stage - используем базовый Alpine (без Docker)
+FROM alpine:3.18
+
+# Устанавливаем только стабильные языки
+RUN apk update && apk --no-cache add \
+    python3 \
+    nodejs \
+    g++
+
+# Копируем бэкенд
+COPY --from=backend /app/backend/main .
+
+# Копируем фронтенд
+COPY --from=frontend /app/frontend/dist ./static
+
+EXPOSE 8080
+CMD ["./main"]

@@ -1,0 +1,6 @@
+ssh user1@82.202.136.214
+yes
+Mazay
+
+
+ssh -i id_ed25519 user1@82.202.136.214
