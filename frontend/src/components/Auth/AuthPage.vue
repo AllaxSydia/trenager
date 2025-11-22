@@ -176,7 +176,7 @@ export default {
   },
   methods: {
     async apiRequest(url, body) {
-      const res = await fetch(`http://localhost:3000${url}`, {
+      const res = await fetch(url, {  // Убрал http://localhost:3000
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
