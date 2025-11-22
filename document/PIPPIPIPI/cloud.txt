@@ -4,3 +4,18 @@ Mazay
 
 
 ssh -i id_ed25519 user1@82.202.136.214
+
+
+Насчёт заливки на сайт
+1. Открывайте cmd и через cd указываете путь до document/pippipi/ssh
+2.  вводите дальше в консоль   ssh -i id_ed25519 user1@82.202.136.214  
+Затем указываете пароль Mazay
+3. Мы открыли сервак. Пишем cd ~/trenager
+4. А дальше работаем как с docker
+docker-compose down
+git pull origin main
+docker-compose up —build
+5. Если нужно проверить используйте 
+docker-compose ps
+или 
+git remote -v
