@@ -9,7 +9,6 @@ import (
 	"backend/internal/models"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -70,8 +69,8 @@ func (s *AuthService) Register(username, email, password string) (*models.User, 
 }
 
 func (s *AuthService) Login(emailOrUsername, password string) (*models.User, string, error) {
-	var id, username, email, passwordHash string
-	var createdAt, updatedAt time.Time
+	var user models.User
+	var passwordHash string
 
 	err := s.db.QueryRow(
 		`SELECT id, username, email, password_hash, created_at, updated_at
@@ -89,14 +88,6 @@ func (s *AuthService) Login(emailOrUsername, password string) (*models.User, str
 	// Сравнение пароля
 	if err := bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(password)); err != nil {
 		return nil, "", errors.New("invalid credentials")
-	}
-
-	user := &models.User{
-		ID:        id,
-		Username:  username,
-		Email:     email,
-		CreatedAt: createdAt,
-		UpdatedAt: updatedAt,
 	}
 
 	token, err := generateJWT(user.ID, user.Username)
