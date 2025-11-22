@@ -6,12 +6,26 @@
     <router-link to="/profile" class="nav-link" active-class="nav-link--active">
       Профиль
     </router-link>
+    <router-link 
+      v-if="userRole === 'teacher'" 
+      to="/admin/statistics" 
+      class="nav-link" 
+      active-class="nav-link--active"
+    >
+      Статистика
+    </router-link>
   </nav>
 </template>
 
 <script>
 export default {
-  name: 'HeaderNav'
+  name: 'HeaderNav',
+  props: {
+    userRole: {
+      type: String,
+      default: 'student'
+    }
+  }
 }
 </script>
 

@@ -88,6 +88,9 @@ func main() {
 	http.HandleFunc("/api/auth/login", loggingMiddleware(corsMiddleware(handlers.LoginHandler)))
 	http.HandleFunc("/api/auth/guest", loggingMiddleware(corsMiddleware(handlers.GuestAuthHandler)))
 	http.HandleFunc("/api/auth/register", loggingMiddleware(corsMiddleware(handlers.RegisterHandler)))
+	
+	// Admin routes (только для преподавателей)
+	http.HandleFunc("/api/admin/statistics", loggingMiddleware(corsMiddleware(handlers.TeacherOnlyMiddleware(handlers.StatisticsHandler))))
 
 	// Test endpoint
 	http.HandleFunc("/api/test", loggingMiddleware(corsMiddleware(func(w http.ResponseWriter, r *http.Request) {

@@ -1,7 +1,7 @@
 <template>
   <div class="header-container">
     <HeaderLogo />
-    <HeaderNav />
+    <HeaderNav :userRole="userRole" />
     <HeaderAuth 
       :isLoggedIn="isLoggedIn"
       :username="username"
@@ -15,6 +15,7 @@
       :isLoggedIn="isLoggedIn"
       :username="username"
       :userAvatar="userAvatar"
+      :userRole="userRole"
       :activeLink="activeLink"
       @navigation="handleNavigation"
       @logout="handleLogout"
@@ -42,6 +43,7 @@ export default {
       isLoggedIn: false,
       username: '',
       userAvatar: '',
+      userRole: '',
       activeLink: '',
       isMobileMenuOpen: false,
       isProfileDropdownOpen: false
@@ -57,7 +59,9 @@ export default {
       this.isLoggedIn = false
       this.username = ''
       this.userAvatar = ''
+      this.userRole = ''
       localStorage.removeItem('user')
+      localStorage.removeItem('token')
       console.log('Выход из системы')
       
       // Принудительно обновляем состояние
@@ -79,9 +83,15 @@ export default {
     },
     
     updateUserData(userData) {
-      this.isLoggedIn = userData.isLoggedIn
-      this.username = userData.username
-      this.userAvatar = userData.userAvatar
+      this.isLoggedIn = userData.isLoggedIn || false
+      this.username = userData.username || ''
+      this.userAvatar = userData.userAvatar || (userData.username ? userData.username.charAt(0).toUpperCase() : 'U')
+      this.userRole = userData.role || 'student'
+      console.log('User role updated:', this.userRole, 'Full data:', userData)
+      // Принудительно обновляем компонент
+      this.$nextTick(() => {
+        this.$forceUpdate()
+      })
     },
     
     checkAuthStatus() {
@@ -90,16 +100,43 @@ export default {
       if (savedUser) {
         try {
           const userData = JSON.parse(savedUser)
-          this.updateUserData(userData)
+          console.log('User data from localStorage:', userData)
+          // Проверяем наличие всех необходимых полей
+          if (userData.isLoggedIn && userData.username) {
+            this.updateUserData({
+              isLoggedIn: userData.isLoggedIn,
+              username: userData.username || '',
+              userAvatar: userData.userAvatar || (userData.username ? userData.username.charAt(0).toUpperCase() : 'U'),
+              role: userData.role || 'student'
+            })
+          } else {
+            // Если данные неполные, сбрасываем
+            this.isLoggedIn = false
+            this.username = ''
+            this.userAvatar = ''
+            this.userRole = ''
+          }
         } catch (e) {
           console.error('Ошибка при чтении данных пользователя:', e)
           localStorage.removeItem('user')
+          this.isLoggedIn = false
+          this.username = ''
+          this.userAvatar = ''
+          this.userRole = ''
         }
       } else {
         // Явно сбрасываем статус если пользователь не авторизован
         this.isLoggedIn = false
         this.username = ''
         this.userAvatar = ''
+        this.userRole = ''
+      }
+    },
+    
+    handleStorageChange(event) {
+      // Обновляем данные при изменении localStorage в другой вкладке
+      if (event.key === 'user' || event.key === null) {
+        this.checkAuthStatus()
       }
     }
   },
@@ -107,12 +144,23 @@ export default {
   mounted() {
     this.checkAuthStatus()
     
+    // Слушаем изменения localStorage
+    window.addEventListener('storage', this.handleStorageChange)
+    
+    // Также слушаем события на текущей вкладке через кастомное событие
+    window.addEventListener('user-auth-changed', this.checkAuthStatus)
+    
     document.addEventListener('click', (event) => {
       if (!this.$el.contains(event.target)) {
         this.isMobileMenuOpen = false
         this.isProfileDropdownOpen = false
       }
     })
+  },
+  
+  beforeUnmount() {
+    window.removeEventListener('storage', this.handleStorageChange)
+    window.removeEventListener('user-auth-changed', this.checkAuthStatus)
   },
   
   // Добавляем watcher для отслеживания изменений маршрута

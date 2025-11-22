@@ -195,7 +195,17 @@ export default {
         this.showToast('error', 'Ошибка входа', data.error || 'Неверные данные');
       } else {
         localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify({ username: data.username, email: data.email }));
+        const userAvatar = data.username ? data.username.charAt(0).toUpperCase() : 'U';
+        const userData = {
+          isLoggedIn: true,
+          username: data.username,
+          email: data.email,
+          userAvatar: userAvatar,
+          role: data.role || 'student'
+        };
+        localStorage.setItem('user', JSON.stringify(userData));
+        // Отправляем событие для обновления Header
+        window.dispatchEvent(new Event('user-auth-changed'));
         this.showToast('success', 'Успех', 'Добро пожаловать!');
         setTimeout(() => this.$router.push('/'), 1000);
       }
@@ -217,7 +227,15 @@ export default {
         this.showToast('error', 'Ошибка', data.error || 'Не удалось зарегистрироваться');
       } else {
         localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify({ username: data.username, email: data.email }));
+        const userAvatar = data.username ? data.username.charAt(0).toUpperCase() : 'U';
+        const userData = {
+          isLoggedIn: true,
+          username: data.username,
+          email: data.email,
+          userAvatar: userAvatar,
+          role: data.role || 'student'
+        };
+        localStorage.setItem('user', JSON.stringify(userData));
         this.showToast('success', 'Регистрация успешна', 'Добро пожаловать!');
         setTimeout(() => this.$router.push('/'), 1000);
       }

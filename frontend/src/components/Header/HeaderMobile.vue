@@ -25,6 +25,13 @@
            :class="{ 'mobile-nav-link--active': $route.name === 'profile' }">
           <span class="link-content">Профиль</span>
         </a>
+        <a v-if="userRole === 'teacher'" 
+           href="#" 
+           class="mobile-nav-link" 
+           @click.prevent="goToStatistics"
+           :class="{ 'mobile-nav-link--active': $route.name === 'statistics' }">
+          <span class="link-content">Статистика</span>
+        </a>
         
         <div v-if="isLoggedIn" class="mobile-profile-section">
           <div class="mobile-profile-info">
@@ -66,6 +73,10 @@ export default {
     isLoggedIn: Boolean,
     username: String,
     userAvatar: String,
+    userRole: {
+      type: String,
+      default: 'student'
+    },
     activeLink: String
   },
   data() {
@@ -95,6 +106,11 @@ export default {
     
     goToProfile() {
       this.$router.push('/profile')
+      this.closeMobileMenu()
+    },
+    
+    goToStatistics() {
+      this.$router.push('/admin/statistics')
       this.closeMobileMenu()
     },
     

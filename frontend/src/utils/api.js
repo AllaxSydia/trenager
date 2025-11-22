@@ -35,11 +35,19 @@ export const api = {
    */
   async checkSolution(requestData) {
     try {
+      const headers = {
+        'Content-Type': 'application/json',
+      }
+      
+      // Добавляем токен авторизации, если он есть
+      const token = localStorage.getItem('token')
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+      
       const response = await fetch(`${API_BASE}/check`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: JSON.stringify(requestData)
       })
       

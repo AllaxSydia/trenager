@@ -30,6 +30,19 @@ const routes = [
     path: '/profile',
     name: 'profile', 
     component: () => import('@/components/Profile/Profile.vue')
+  },
+  {
+    path: '/admin/statistics',
+    name: 'statistics',
+    component: () => import('@/components/Admin/Statistics.vue'),
+    beforeEnter: (to, from, next) => {
+      const user = JSON.parse(localStorage.getItem('user') || '{}')
+      if (user.isLoggedIn && user.role === 'teacher') {
+        next()
+      } else {
+        next('/')
+      }
+    }
   }
 ]
 

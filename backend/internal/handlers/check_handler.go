@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"backend/internal/database"
 	"backend/internal/models"
 	"encoding/json"
 	"log"
@@ -135,11 +136,48 @@ func CheckHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("📊 Check completed - Success: %t, Passed: %d/%d",
 		allTestsPassed, response.PassedTests, response.TotalTests)
 
+	// Сохраняем решение в БД, если пользователь авторизован
+	auth := r.Header.Get("Authorization")
+	if auth != "" {
+		parts := strings.Fields(auth)
+		if len(parts) == 2 && strings.ToLower(parts[0]) == "bearer" {
+			// Пытаемся получить user_id из токена
+			claims, err := ParseTokenFromRequest(r)
+			if err == nil {
+				if userIDFloat, ok := claims["sub"].(float64); ok {
+					userID := int64(userIDFloat)
+					saveTaskSolution(userID, taskID, req.Language, req.Code, allTestsPassed, response.PassedTests, response.TotalTests)
+				}
+			}
+		}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		log.Printf("❌ Failed to encode check response: %v", err)
 		http.Error(w, `{"success": false, "message": "Internal server error"}`, http.StatusInternalServerError)
 		return
+	}
+}
+
+// saveTaskSolution сохраняет решение задачи в БД
+func saveTaskSolution(userID int64, taskID, language, code string, success bool, passedTests, totalTests int) {
+	query := `
+	INSERT INTO task_solutions (user_id, task_id, language, code, success, passed_tests, total_tests)
+	VALUES ($1, $2, $3, $4, $5, $6, $7)
+	ON CONFLICT (user_id, task_id, language) 
+	DO UPDATE SET 
+		code = EXCLUDED.code,
+		success = EXCLUDED.success,
+		passed_tests = EXCLUDED.passed_tests,
+		total_tests = EXCLUDED.total_tests,
+		created_at = CURRENT_TIMESTAMP
+	`
+	_, err := database.DB.Exec(query, userID, taskID, language, code, success, passedTests, totalTests)
+	if err != nil {
+		log.Printf("⚠️ Ошибка при сохранении решения задачи: %v", err)
+	} else {
+		log.Printf("✅ Решение задачи сохранено: user_id=%d, task_id=%s, language=%s", userID, taskID, language)
 	}
 }
 
