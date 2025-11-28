@@ -13,8 +13,11 @@ services:
       - DB_PASSWORD=postgres
       - DB_NAME=trenager
       - MODE=local
+      - JWT_SECRET=${JWT_SECRET}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     depends_on:
       - db
+    restart: unless-stopped
     networks:
       - backend_net
 

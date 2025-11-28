@@ -19,3 +19,7 @@ docker-compose up —build
 docker-compose ps
 или 
 git remote -v
+
+Это ключ от DeepSeek
+
+DEEPSEEK_API_KEY=sk-0553dba769184a2aaef271b5bbc89e42
