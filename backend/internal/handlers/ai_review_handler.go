@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"time"
 )
 
 type AIReviewRequest struct {
@@ -51,5 +53,39 @@ func AIReviewHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Printf("✅ AI Review Handler: Success, score: %d\n", response.Score)
+	json.NewEncoder(w).Encode(response)
+}
+
+func AIHealthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	response := map[string]interface{}{
+		"status":    "ok",
+		"service":   "ai_code_review",
+		"timestamp": time.Now().UTC(),
+		"endpoints": map[string]string{
+			"/api/ai/review": "POST - Analyze code with AI",
+		},
+	}
+
+	// Проверяем, есть ли API ключ
+	openrouterKey := os.Getenv("OPENROUTER_API_KEY")
+	openaiKey := os.Getenv("OPENAI_API_KEY")
+
+	if openrouterKey != "" {
+		response["ai_provider"] = "OpenRouter"
+		response["ai_status"] = "configured"
+		response["has_key"] = true
+	} else if openaiKey != "" {
+		response["ai_provider"] = "OpenAI"
+		response["ai_status"] = "configured"
+		response["has_key"] = true
+	} else {
+		response["ai_provider"] = "mock"
+		response["ai_status"] = "mock_mode"
+		response["has_key"] = false
+		response["message"] = "Add OPENROUTER_API_KEY or OPENAI_API_KEY to .env for real AI"
+	}
+
 	json.NewEncoder(w).Encode(response)
 }

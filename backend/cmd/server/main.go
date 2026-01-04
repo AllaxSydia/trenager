@@ -29,6 +29,9 @@ func main() {
 		log.Println("✅ Static directory found")
 	}
 
+	// Создаем экземпляр TaskHandler
+	taskHandler := handlers.NewTaskHandler(database.DB)
+
 	// CORS middleware
 	corsMiddleware := func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
@@ -82,18 +85,19 @@ func main() {
 	}
 
 	// API Routes with CORS and logging
-	http.HandleFunc("/api/tasks", loggingMiddleware(corsMiddleware(handlers.TasksHandler)))
+	// ОБНОВЛЕНО: Используем методы TaskHandler
+	http.HandleFunc("/api/tasks", loggingMiddleware(corsMiddleware(taskHandler.GetTasksHandler)))
 	http.HandleFunc("/api/check", loggingMiddleware(corsMiddleware(handlers.CheckHandler)))
+	http.HandleFunc("/api/ai/review", loggingMiddleware(corsMiddleware(handlers.AIReviewHandler)))
 	http.HandleFunc("/api/execute", loggingMiddleware(corsMiddleware(handlers.ExecuteHandler)))
 	http.HandleFunc("/api/auth/login", loggingMiddleware(corsMiddleware(handlers.LoginHandler)))
-	http.HandleFunc("/api/ai/review", loggingMiddleware(corsMiddleware(handlers.AIReviewHandler)))
-	http.HandleFunc("/api/auth/guest", loggingMiddleware(corsMiddleware(handlers.GuestAuthHandler)))
 	http.HandleFunc("/api/auth/register", loggingMiddleware(corsMiddleware(handlers.RegisterHandler)))
+	http.HandleFunc("/api/auth/guest", loggingMiddleware(corsMiddleware(handlers.GuestAuthHandler)))
+	http.HandleFunc("/api/auth/quick-login", loggingMiddleware(corsMiddleware(handlers.QuickLoginHandler)))
+	http.HandleFunc("/api/auth/validate", loggingMiddleware(corsMiddleware(handlers.ValidateTokenHandler)))
+	http.HandleFunc("/api/auth/user-info", loggingMiddleware(corsMiddleware(handlers.GetUserInfoHandler)))
+	http.HandleFunc("/api/ai/health", loggingMiddleware(corsMiddleware(handlers.AIHealthCheckHandler)))
 
-	// Admin routes (только для преподавателей)
-	http.HandleFunc("/api/admin/statistics", loggingMiddleware(corsMiddleware(handlers.TeacherOnlyMiddleware(handlers.StatisticsHandler))))
-
-	// Test endpoint
 	http.HandleFunc("/api/test", loggingMiddleware(corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		response := map[string]interface{}{
@@ -104,6 +108,41 @@ func main() {
 			"environment": getEnvironment(),
 		}
 		json.NewEncoder(w).Encode(response)
+	})))
+
+	// Admin routes (только для преподавателей)
+	http.HandleFunc("/api/admin/statistics", loggingMiddleware(corsMiddleware(handlers.TeacherOnlyMiddleware(handlers.StatisticsHandler))))
+
+	// ДОБАВЛЕНО: Роуты для управления задачами (учительская панель)
+	http.HandleFunc("/api/teacher/tasks", loggingMiddleware(corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "GET":
+			taskHandler.GetTeacherTasksHandler(w, r)
+		case "POST":
+			taskHandler.CreateTaskHandler(w, r)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	})))
+
+	http.HandleFunc("/api/teacher/tasks/", loggingMiddleware(corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		// Извлекаем ID из URL
+		path := strings.TrimPrefix(r.URL.Path, "/api/teacher/tasks/")
+		id := path
+
+		// Добавляем ID в query параметры для хендлера
+		q := r.URL.Query()
+		q.Set("id", id)
+		r.URL.RawQuery = q.Encode()
+
+		switch r.Method {
+		case "PUT":
+			taskHandler.UpdateTaskHandler(w, r)
+		case "DELETE":
+			taskHandler.DeleteTaskHandler(w, r)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
 	})))
 
 	// Health check
@@ -142,7 +181,7 @@ func main() {
 		json.NewEncoder(w).Encode(response)
 	})))
 
-	// Task endpoint
+	// Task endpoint (старый формат для обратной совместимости)
 	http.HandleFunc("/api/task/", loggingMiddleware(corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -202,7 +241,7 @@ func main() {
 			"error":         "API endpoint not found",
 			"path":          r.URL.Path,
 			"timestamp":     time.Now().Format(time.RFC3339),
-			"documentation": "Available endpoints: /api/execute, /api/check, /api/task/:lang/:topic/:id",
+			"documentation": "Available endpoints: /api/execute, /api/check, /api/task/:lang/:topic/:id, /api/tasks, /api/teacher/tasks",
 		})
 	})))
 
@@ -214,6 +253,11 @@ func main() {
 	log.Printf("   POST /api/execute")
 	log.Printf("   POST /api/check")
 	log.Printf("   GET  /api/task/:lang/:topic/:id")
+	log.Printf("   GET  /api/tasks")
+	log.Printf("   GET  /api/teacher/tasks (for teachers)")
+	log.Printf("   POST /api/teacher/tasks (for teachers)")
+	log.Printf("   PUT  /api/teacher/tasks/:id (for teachers)")
+	log.Printf("   DELETE /api/teacher/tasks/:id (for teachers)")
 
 	// Запускаем сервер
 	server := &http.Server{

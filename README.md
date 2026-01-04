@@ -29,3 +29,6 @@ go run cmd/server/main.go
 
 # frontend
 npm run dev
+
+# openRouter-api
+key  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

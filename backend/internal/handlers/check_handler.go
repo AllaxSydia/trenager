@@ -3,6 +3,7 @@ package handlers
 import (
 	"backend/internal/database"
 	"backend/internal/models"
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -44,12 +45,15 @@ func CheckHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("🔍 Checking code for task: %s, language: %s, code length: %d", taskID, req.Language, len(req.Code))
 
-	// Получаем задачу для проверки
-	taskKey := req.Language + "_" + taskID
-	task, exists := tasks[taskKey]
-	if !exists {
-		http.Error(w, `{"success": false, "message": "Task not found"}`, http.StatusNotFound)
-		return
+	// Получаем задачу из БД
+	task, err := getTaskFromDB(req.Language, taskID)
+	if err != nil {
+		// Если не найдено в БД, пробуем получить встроенную задачу
+		task = getBuiltInTask(req.Language, taskID)
+		if task.ID == "" {
+			http.Error(w, `{"success": false, "message": "Task not found"}`, http.StatusNotFound)
+			return
+		}
 	}
 
 	// Используем тесты из задачи, если не предоставлены в запросе
@@ -71,7 +75,8 @@ func CheckHandler(w http.ResponseWriter, r *http.Request) {
 		// Подготавливаем входные данные если есть
 		var inputs []string
 		if test.Input != "" {
-			inputs = []string{test.Input}
+			// Разделяем многострочный ввод
+			inputs = strings.Split(test.Input, "\n")
 		}
 
 		// Выполняем код с текущим тестом
@@ -158,6 +163,127 @@ func CheckHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, `{"success": false, "message": "Internal server error"}`, http.StatusInternalServerError)
 		return
 	}
+}
+
+// getTaskFromDB получает задачу из базы данных
+func getTaskFromDB(language, taskID string) (models.Task, error) {
+	var task models.Task
+
+	query := `
+		SELECT id::text, title, description, language, template, 
+		       starter_code, tests, created_at, updated_at
+		FROM tasks 
+		WHERE language = $1 AND id::text = $2 AND is_published = true
+	`
+
+	var testsJSON []byte
+	var createdAt, updatedAt string // Используем string для временных меток
+	var starterCode, template sql.NullString
+
+	err := database.DB.QueryRow(query, language, taskID).Scan(
+		&task.ID,
+		&task.Title,
+		&task.Description,
+		&task.Language,
+		&template,
+		&starterCode,
+		&testsJSON,
+		&createdAt,
+		&updatedAt,
+	)
+
+	if err != nil {
+		return task, err
+	}
+
+	// Заполняем опциональные поля
+	if template.Valid {
+		task.Template = template.String
+	}
+	if starterCode.Valid {
+		task.StarterCode = starterCode.String
+	}
+
+	// Парсим тесты
+	if err := json.Unmarshal(testsJSON, &task.Tests); err != nil {
+		log.Printf("Error parsing tests JSON: %v", err)
+		// Возвращаем задачу без тестов
+		task.Tests = []models.Test{}
+	}
+
+	return task, nil
+}
+
+// getBuiltInTask возвращает встроенную задачу
+func getBuiltInTask(language, taskID string) models.Task {
+	// Встроенные задачи для обратной совместимости
+	builtInTasks := map[string]models.Task{
+		"python_1": {
+			ID:          "1",
+			Title:       "Hello World",
+			Description: "Напишите программу которая выводит 'Hello, World!'",
+			Language:    "python",
+			Template:    `print("Hello, World!")`,
+			Tests: []models.Test{
+				{
+					Input:          "",
+					ExpectedOutput: "Hello, World!",
+				},
+			},
+		},
+		"python_2": {
+			ID:          "2",
+			Title:       "Сумма двух чисел",
+			Description: "Напишите программу которая принимает два числа через input() и выводит их сумму",
+			Language:    "python",
+			Template: `num1 = int(input())
+num2 = int(input())
+print(num1 + num2)`,
+			Tests: []models.Test{
+				{
+					Input:          "5\n3",
+					ExpectedOutput: "8",
+				},
+				{
+					Input:          "10\n20",
+					ExpectedOutput: "30",
+				},
+			},
+		},
+		"python_3": {
+			ID:          "3",
+			Title:       "Факториал",
+			Description: "Напишите функцию для вычисления факториала числа",
+			Language:    "python",
+			Template: `def factorial(n):
+    if n == 0:
+        return 1
+    result = 1
+    for i in range(1, n + 1):
+        result *= i
+    return result
+
+# Тестирование
+print(factorial(5))`,
+			Tests: []models.Test{
+				{
+					Input:          "5",
+					ExpectedOutput: "120",
+				},
+				{
+					Input:          "0",
+					ExpectedOutput: "1",
+				},
+			},
+		},
+	}
+
+	key := language + "_" + taskID
+	if task, exists := builtInTasks[key]; exists {
+		return task
+	}
+
+	return models.Task{} // Пустая задача если не найдено
 }
 
 // saveTaskSolution сохраняет решение задачи в БД

@@ -21,6 +21,7 @@
 
       <!-- Основной контент -->
       <main class="main-content" v-if="currentLesson">
+
         <ProblemSection :lesson="currentLesson" />
         
         <CodeSection
@@ -34,10 +35,12 @@
           :is-running="isRunning"
           :is-testing="isTesting"
           :is-submitting="isSubmitting"
+          :ai-loading="aiLoading"
           @run="runCode"
           @test="runTests"
           @submit="submitSolution"
           @save="saveCode"
+          @analyze="analyzeWithAI"
         />
         
         <InputSection 
@@ -60,9 +63,12 @@
       <div v-else class="no-lesson-selected">
         <div class="loading-message">
           <h3>Загрузка курса {{ language }}...</h3>
-          <p>Выберите урок из списка слева</p>
+          <p v-if="isLoading">Загружаем задачи с сервера...</p>
+          <p v-else-if="apiTasks.length > 0">Выберите задачу из списка слева</p>
+          <p v-else>Нет доступных задач для этого языка</p>
           <div class="debug-info">
             <p><strong>Отладка:</strong></p>
+            <p>Задач из БД: {{ apiTasks.length }}</p>
             <p>Уроков доступно: {{ internalLessons.length }}</p>
             <p>Текущий урок: {{ currentLesson ? currentLesson.title : 'не выбран' }}</p>
             <p>Язык: {{ language }}</p>
@@ -70,6 +76,8 @@
         </div>
       </div>
     </div>
+
+    
 
     <!-- Мобильный сайдбар -->
     <MobileSidebar
@@ -117,7 +125,7 @@ export default {
     },
     lessons: {
       type: Array,
-      required: true
+      default: () => []
     },
     language: {
       type: String,
@@ -137,7 +145,10 @@ export default {
       showSidebar: false,
       isMobile: false,
       isLoading: false,
-      internalLessons: []
+      internalLessons: [],
+      aiLoading: false,
+      apiTasks: [],  // Задачи из API/БД
+      aiResult: null
     }
   },
   computed: {
@@ -160,93 +171,203 @@ export default {
       immediate: true,
       handler(newLessons) {
         console.log('Lessons prop updated:', newLessons)
-        this.internalLessons = JSON.parse(JSON.stringify(newLessons))
+        // Если есть переданные уроки, используем их
+        if (newLessons && newLessons.length > 0) {
+          this.internalLessons = this.formatLessons(newLessons)
+        } else {
+          // Иначе используем задачи из API
+          this.internalLessons = this.formatLessons(this.apiTasks)
+        }
+        this.ensureLessonSelected()
+      }
+    },
+    apiTasks: {
+      handler(newTasks) {
+        console.log('API tasks updated:', newTasks)
+        // Обновляем уроки когда загружаются задачи из API
+        this.internalLessons = this.formatLessons(newTasks)
         this.ensureLessonSelected()
       }
     }
   },
   mounted() {
     console.log('CourseLayout mounted for language:', this.language)
-    console.log('Initial lessons (raw):', this.lessons)
-    console.log('First lesson (raw):', this.lessons[0])
-    console.log('First lesson tests (raw):', this.lessons[0]?.tests)
-    
-    // Проверим структуру тестов
-    if (this.lessons[0]?.tests) {
-      console.log('First test structure:', this.lessons[0].tests[0])
-      console.log('First test keys:', Object.keys(this.lessons[0].tests[0]))
-    }
     
     this.checkMobile()
     window.addEventListener('resize', this.checkMobile)
     this.checkBackendConnection()
     
-    this.internalLessons = JSON.parse(JSON.stringify(this.lessons))
+    // Инициализируем уроки
+    if (this.lessons && this.lessons.length > 0) {
+      this.internalLessons = this.formatLessons(this.lessons)
+    } else {
+      this.loadTasksFromAPI()
+    }
+    
     this.ensureLessonSelected()
   },
   methods: {
-    ensureLessonSelected() {
-      if (this.internalLessons.length > 0 && !this.currentLesson) {
-        console.log('Selecting first lesson:', this.internalLessons[0])
-        this.selectLesson(this.internalLessons[0])
-      } else if (this.internalLessons.length === 0) {
-        console.warn('No lessons available for selection')
-      }
+    // Форматируем задачи в формат уроков
+    formatLessons(tasks) {
+      if (!tasks || !Array.isArray(tasks)) return []
+      
+      console.log('=== ФОРМАТИРОВАНИЕ УРОКОВ ===')
+      console.log('Входные задачи:', tasks.length)
+      
+      const result = tasks.map((task, index) => {
+        const formattedLesson = {
+          id: task.id || `task_${index + 1}`,
+          title: task.title || `Задача ${index + 1}`,
+          description: task.description || '',
+          starterCode: task.template || task.starter_code || '',
+          code: task.template || task.starter_code || '',
+          language: task.language || this.language,
+          difficulty: task.difficulty || 'beginner',
+          completed: false,
+          tests: this.prepareTests(task.tests || []),
+          apiData: task
+        }
+        
+        console.log(`Урок ${index}:`, formattedLesson.title)
+        console.log('Кол-во тестов:', formattedLesson.tests.length)
+        if (formattedLesson.tests.length > 0) {
+          console.log('Тесты:', formattedLesson.tests)
+        }
+        
+        return formattedLesson
+      })
+      
+      return result
     },
-
-    async checkBackendConnection() {
-    try {
-      const health = await api.healthCheck()
-      if (health.status === 'healthy' || health.status === 'api_healthy') {
-        this.consoleOutput += '✅ Все системы работают нормально\n'
-      }
-    } catch (error) {
-      // Не показываем ошибку пользователю при загрузке
-      console.log('Бэкенд недоступен:', error.message)
-    }
-  },
-
+    
     async loadTasksFromAPI() {
       this.isLoading = true
       try {
-        console.log(`Loading tasks for language: ${this.language}`)
+        console.log(`Загрузка задач для языка: ${this.language}`)
         const tasks = await api.getTasks(this.language)
-        console.log('Tasks from API:', tasks)
+        console.log('Задачи получены:', tasks)
         
-        // ДЕБАГ: посмотрим структуру полученных задач
         if (tasks && tasks.length > 0) {
-          console.log('First task from API:', tasks[0])
-          console.log('Tests in first task:', tasks[0].tests)
+          // Форматируем задачи в уроки
+          this.internalLessons = this.formatLessons(tasks)
+          console.log(`✅ Загружено ${tasks.length} задач`)
+          this.ensureLessonSelected()
+        } else {
+          // Используем статические уроки
+          this.useStaticLessons()
         }
-        
-        this.internalLessons = JSON.parse(JSON.stringify(this.lessons))
-        console.log('Using lessons from props:', this.internalLessons)
-        
-        // ДЕБАГ: посмотрим тесты в пропсах
-        if (this.internalLessons && this.internalLessons.length > 0) {
-          console.log('First lesson tests from props:', this.internalLessons[0].tests)
-        }
-        
-        this.ensureLessonSelected()
-        this.updateProgress()
         
       } catch (error) {
-        console.error('Failed to load tasks from API:', error)
-        this.internalLessons = JSON.parse(JSON.stringify(this.lessons))
-        this.ensureLessonSelected()
-        this.updateProgress()
+        console.error('Ошибка загрузки задач:', error)
+        this.useStaticLessons()
       } finally {
         this.isLoading = false
       }
     },
-
-    updateProgress() {
-      const completedCount = this.internalLessons.filter(lesson => lesson.completed).length
-      this.progress = Math.round((completedCount / this.internalLessons.length) * 100)
+    
+    formatLessons(tasks) {
+      if (!tasks || !Array.isArray(tasks)) return []
+      
+      console.log('Форматируем задачи в уроки...')
+      
+      return tasks.map((task, index) => ({
+        id: task.id || index + 1,
+        title: task.title || `Задача ${index + 1}`,
+        description: task.description || '',
+        starterCode: task.template || task.starter_code || task.code_template || '',
+        code: task.template || task.starter_code || task.code_template || '',
+        language: task.language || this.language,
+        difficulty: task.difficulty || 'beginner',
+        completed: false,
+        tests: this.prepareTests(task.tests || [])
+      }))
+    },
+    
+    prepareTests(tests) {
+      console.log('Подготавливаем тесты:', tests)
+      
+      if (!Array.isArray(tests)) return []
+      
+      return tests.map(test => ({
+        input: test.input || '',
+        expected_output: test.expected_output || '',  // Оставляем как есть, даже если пустое
+        status: null,
+        actual: null,
+        error: null
+      }))
+    },
+    
+    useStaticLessons() {
+      console.log('Используем статические уроки')
+      
+      const staticLessons = {
+        python: [
+          {
+            id: 1,
+            title: "Проверка числа на четность",
+            description: "Напишите программу, которая проверяет, является ли число четным",
+            language: "python",
+            difficulty: "beginner",
+            starterCode: `num = int(input())\nif num % 2 == 0:\n    print("Четное")\nelse:\n    print("Нечетное")`,
+            code: `num = int(input())\nif num % 2 == 0:\n    print("Четное")\nelse:\n    print("Нечетное")`,
+            tests: [
+              { input: "4", expected_output: "Четное" },
+              { input: "7", expected_output: "Нечетное" }
+            ]
+          },
+          {
+            id: 2,
+            title: "Сумма двух чисел",
+            description: "Напишите программу, которая принимает два числа через input() и выводит их сумму",
+            language: "python",
+            difficulty: "beginner",
+            starterCode: `num1 = int(input())\nnum2 = int(input())\nprint(num1 + num2)`,
+            code: `num1 = int(input())\nnum2 = int(input())\nprint(num1 + num2)`,
+            tests: [
+              { input: "5\n3", expected_output: "8" },
+              { input: "10\n20", expected_output: "30" }
+            ]
+          }
+        ],
+        javascript: [
+          {
+            id: 1,
+            title: "Hello World на JavaScript",
+            description: "Напишите программу, которая выводит 'Hello, World!'",
+            language: "javascript",
+            difficulty: "beginner",
+            starterCode: `console.log("Hello, World!")`,
+            code: `console.log("Hello, World!")`,
+            tests: [
+              { input: "", expected_output: "Hello, World!" }
+            ]
+          }
+        ]
+      }
+      
+      this.internalLessons = staticLessons[this.language] || []
+      this.ensureLessonSelected()
+    },
+    
+    ensureLessonSelected() {
+      if (this.internalLessons.length > 0 && !this.currentLesson) {
+        console.log('Выбираем первый урок:', this.internalLessons[0])
+        this.selectLesson(this.internalLessons[0])
+      } else if (this.internalLessons.length === 0) {
+        console.warn('Нет уроков для выбора')
+        this.currentLesson = null
+      }
     },
 
-    checkMobile() {
-      this.isMobile = window.innerWidth <= 1024
+    async checkBackendConnection() {
+      try {
+        const health = await api.healthCheck()
+        if (health.status === 'healthy' || health.status === 'api_healthy') {
+          this.consoleOutput += '✅ Все системы работают нормально\n'
+        }
+      } catch (error) {
+        console.log('Бэкенд недоступен:', error.message)
+      }
     },
 
     selectLesson(lesson) {
@@ -256,73 +377,10 @@ export default {
       }
       
       console.log('Selecting lesson:', lesson.title)
+      console.log('Lesson data:', lesson)
       
-      // ИСПРАВЛЕННЫЕ тесты с правильными входными данными
-      const hardcodedTests = {
-        'python_1': [{ 
-          input: '', 
-          expected_output: 'Hello, World!' 
-        }],
-        'python_2': [
-          { 
-            input: '5\n3', 
-            expected_output: '8' 
-          },
-          { 
-            input: '10\n20', 
-            expected_output: '30' 
-          },
-          { 
-            input: '-5\n8', 
-            expected_output: '3' 
-          }
-        ],
-        'python_3': [
-          { 
-            input: '5', 
-            expected_output: '120' 
-          },
-          { 
-            input: '3', 
-            expected_output: '6' 
-          },
-          { 
-            input: '1', 
-            expected_output: '1' 
-          }
-        ],
-        'python_4': [
-          { 
-            input: '4', 
-            expected_output: 'чётное' 
-          },
-          { 
-            input: '7', 
-            expected_output: 'нечётное' 
-          }
-        ],
-        'python_5': [
-          { 
-            input: '1\n2\n3', 
-            expected_output: '3' 
-          },
-          { 
-            input: '10\n5\n8', 
-            expected_output: '10' 
-          }
-        ],
-        'javascript_1': [{ 
-          input: '', 
-          expected_output: 'Hello, World!' 
-        }],
-        'javascript_2': [{ 
-          input: '', 
-          expected_output: '8' 
-        }],
-      }
-      
-      const testKey = `${this.language}_${lesson.id}`
-      const tests = hardcodedTests[testKey] || []
+      // Используем тесты из задачи
+      const tests = lesson.tests || []
       
       this.currentLesson = { 
         ...lesson,
@@ -336,7 +394,7 @@ export default {
       
       console.log('Current lesson with tests:', this.currentLesson)
       
-      this.userCode = lesson.starterCode || ''
+      this.userCode = lesson.starterCode || lesson.code || ''
       this.consoleInput = ''
       this.consoleOutput = ''
       this.loadSavedCode()
@@ -348,7 +406,7 @@ export default {
     },
 
     resetCode() {
-      this.userCode = this.currentLesson?.starterCode || ''
+      this.userCode = this.currentLesson?.starterCode || this.currentLesson?.code || ''
       this.consoleOutput = '🔄 Код сброшен к начальному состоянию\n'
     },
 
@@ -384,6 +442,104 @@ export default {
       } finally {
         this.isRunning = false
       }
+    },
+
+    async analyzeWithAI() {
+      if (!this.userCode?.trim()) {
+        console.log('❌ Нет кода для анализа')
+        this.consoleOutput += '\n❌ Введите код для AI анализа\n'
+        return
+      }
+      
+      if (this.aiLoading) {
+        console.log('⚠️ AI анализ уже выполняется')
+        return
+      }
+      
+      console.log('🚀 Запуск AI анализа...')
+      
+      this.aiLoading = true
+      this.aiResult = null  // Сбрасываем предыдущий результат
+      this.consoleOutput += '\n🤖 Запуск AI анализа кода...\n'
+
+      try {
+        const aiResult = await api.analyzeCode({
+          code: this.userCode,
+          language: this.language,
+          task_context: this.currentLesson?.description || 'Анализ кода студента'
+        })
+        
+        console.log('✅ AI анализ завершен, результат:', aiResult)
+        
+        if (aiResult && aiResult.score !== undefined) {
+          this.aiResult = aiResult  // Сохраняем результат для UI
+          this.formatAIResponse(aiResult)  // Также выводим в консоль
+        } else {
+          console.error('❌ Неверный формат ответа от AI:', aiResult)
+          this.consoleOutput += '\n❌ Ошибка: неверный формат ответа от AI\n'
+        }
+        
+      } catch (error) {
+        console.error('❌ AI анализ ошибка:', error)
+        this.consoleOutput += `\n❌ Ошибка AI анализа: ${error.message}\n`
+      } finally {
+        this.aiLoading = false
+      }
+    },
+
+    formatAIResponse(aiData) {
+      this.consoleOutput += '='.repeat(50) + '\n'
+      this.consoleOutput += '🤖 AI АНАЛИЗ КОДА:\n'
+      this.consoleOutput += '='.repeat(50) + '\n\n'
+      
+      // Оценка
+      const score = aiData.score || 0
+      let scoreEmoji = '⭐'
+      if (score >= 8) scoreEmoji = '🌟'
+      else if (score >= 6) scoreEmoji = '⭐'
+      else scoreEmoji = '⚠️'
+      
+      this.consoleOutput += `${scoreEmoji} ОЦЕНКА: ${score}/10\n`
+      this.consoleOutput += `📊 СЛОЖНОСТЬ: ${aiData.complexity || 'неизвестно'}\n\n`
+      
+      // Комментарии
+      if (aiData.comments && aiData.comments.length > 0) {
+        this.consoleOutput += '💬 КОММЕНТАРИИ:\n'
+        aiData.comments.forEach((comment, index) => {
+          this.consoleOutput += `  ${index + 1}. ${comment}\n`
+        })
+        this.consoleOutput += '\n'
+      }
+      
+      // Предложения
+      if (aiData.suggestions && aiData.suggestions.length > 0) {
+        this.consoleOutput += '💡 ПРЕДЛОЖЕНИЯ ПО УЛУЧШЕНИЮ:\n'
+        aiData.suggestions.forEach((suggestion, index) => {
+          this.consoleOutput += `  ${index + 1}. ${suggestion}\n`
+        })
+        this.consoleOutput += '\n'
+      }
+      
+      // Best Practices
+      if (aiData.best_practices && aiData.best_practices.length > 0) {
+        this.consoleOutput += '🏆 BEST PRACTICES:\n'
+        aiData.best_practices.forEach((practice, index) => {
+          this.consoleOutput += `  ${index + 1}. ${practice}\n`
+        })
+        this.consoleOutput += '\n'
+      }
+      
+      // Альтернативные решения
+      if (aiData.alternative_solutions && aiData.alternative_solutions.length > 0) {
+        this.consoleOutput += '🔄 АЛЬТЕРНАТИВНЫЕ РЕШЕНИЯ:\n'
+        aiData.alternative_solutions.forEach((solution, index) => {
+          this.consoleOutput += `  ${index + 1}. ${solution}\n`
+        })
+        this.consoleOutput += '\n'
+      }
+      
+      this.consoleOutput += '='.repeat(50) + '\n'
+      this.consoleOutput += '✅ AI анализ завершен!\n'
     },
 
     async runTests() {
@@ -461,11 +617,21 @@ export default {
           this.updateProgress()
         }
         this.consoleOutput += '\n🎉 Поздравляем! Все тесты пройдены! Задача решена правильно.\n'
+        
+        // Автоматически запускаем AI анализ при успешной сдаче
+        setTimeout(() => {
+          this.analyzeWithAI()
+        }, 1000)
       } else {
         this.consoleOutput += '\n❌ Не все тесты пройдены. Продолжайте работать над решением!\n'
       }
       
       this.isSubmitting = false
+    },
+
+    updateProgress() {
+      const completedCount = this.internalLessons.filter(lesson => lesson.completed).length
+      this.progress = Math.round((completedCount / this.internalLessons.length) * 100)
     },
 
     saveCode() {
@@ -484,6 +650,10 @@ export default {
 
     clearOutput() {
       this.consoleOutput = ''
+    },
+    
+    checkMobile() {
+      this.isMobile = window.innerWidth <= 1024
     }
   }
 }
@@ -581,5 +751,38 @@ export default {
   .course-page {
     padding: 5px;
   }
+}
+
+.no-lesson-selected {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  grid-column: 2;
+}
+
+.loading-message {
+  text-align: center;
+  color: #94A3B8;
+}
+
+.loading-message h3 {
+  margin-bottom: 10px;
+  color: #E2E8F0;
+}
+
+.debug-info {
+  margin-top: 20px;
+  padding: 15px;
+  background: #1E293B;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  font-family: monospace;
+  font-size: 14px;
+  text-align: left;
+}
+
+.debug-info p {
+  margin: 5px 0;
 }
 </style>

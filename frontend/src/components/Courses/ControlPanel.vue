@@ -16,6 +16,13 @@
         Проверить тесты
       </button>
       <button 
+        class="btn btn--ai" 
+        @click="$emit('analyze')"
+        :disabled="aiLoading"
+      >
+        🤖 AI Анализ
+      </button>
+      <button 
         class="btn btn--success" 
         @click="$emit('submit')"
         :disabled="isSubmitting"
@@ -38,9 +45,10 @@ export default {
   props: {
     isRunning: Boolean,
     isTesting: Boolean,
-    isSubmitting: Boolean
+    isSubmitting: Boolean,
+    aiLoading: Boolean  // ДОБАВЛЕНО: пропс для AI анализа
   },
-  emits: ['run', 'test', 'submit', 'save']
+  emits: ['run', 'test', 'analyze', 'submit', 'save']  // ДОБАВЛЕНО: 'analyze'
 }
 </script>
 
@@ -123,6 +131,46 @@ export default {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
+/* ДОБАВЛЕНО: Стили для AI кнопки */
+.btn--ai {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  position: relative;
+}
+
+.btn--ai:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.btn--ai:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+.btn--ai:disabled {
+  background: linear-gradient(135deg, #999 0%, #666 100%);
+}
+
+/* Эффект пульсации для AI кнопки */
+@keyframes aiPulse {
+  0% {
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.6);
+  }
+  100% {
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
+}
+
+.btn--ai:hover:not(:disabled) {
+  animation: aiPulse 2s infinite;
+}
+
 .btn--success {
   background: #303030;
   color: #E2E8F0;
@@ -184,6 +232,10 @@ export default {
   .btn {
     padding: 0.6rem 1rem;
     font-size: 0.8rem;
+  }
+  
+  .btn--ai {
+    order: 3; /* AI кнопка третья на мобильных */
   }
 }
 </style>

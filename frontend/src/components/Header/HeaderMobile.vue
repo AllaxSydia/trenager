@@ -25,12 +25,21 @@
            :class="{ 'mobile-nav-link--active': $route.name === 'profile' }">
           <span class="link-content">Профиль</span>
         </a>
+        <!-- ДОБАВЛЕНО: Кнопка для Статистики -->
         <a v-if="userRole === 'teacher'" 
            href="#" 
            class="mobile-nav-link" 
            @click.prevent="goToStatistics"
            :class="{ 'mobile-nav-link--active': $route.name === 'statistics' }">
           <span class="link-content">Статистика</span>
+        </a>
+        <!-- ДОБАВЛЕНО: Кнопка для Задач (только для учителей) -->
+        <a v-if="userRole === 'teacher'" 
+           href="#" 
+           class="mobile-nav-link" 
+           @click.prevent="goToTasks"
+           :class="{ 'mobile-nav-link--active': $route.name === 'teacher-tasks' }">
+          <span class="link-content">📋 Задачи</span>
         </a>
         
         <div v-if="isLoggedIn" class="mobile-profile-section">
@@ -111,6 +120,12 @@ export default {
     
     goToStatistics() {
       this.$router.push('/admin/statistics')
+      this.closeMobileMenu()
+    },
+    
+    // ДОБАВЛЕНО: Переход на страницу задач
+    goToTasks() {
+      this.$router.push('/admin/tasks')
       this.closeMobileMenu()
     },
     

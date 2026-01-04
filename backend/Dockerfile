@@ -1,4 +1,4 @@
-FROM golang:1.25.3-alpine
+FROM golang:1.24-alpine
 
 # Устанавливаем зависимости
 RUN apk add --no-cache git

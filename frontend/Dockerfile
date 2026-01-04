@@ -6,6 +6,10 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
+
+# Проверяем и устанавливаем axios если его нет
+RUN if ! npm list axios; then npm install axios; fi
+
 RUN npm run build
 
 FROM nginx:alpine

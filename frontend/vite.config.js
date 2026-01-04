@@ -17,11 +17,19 @@ export default defineConfig({
         secure: false
       }
     },
-    hmr: {
-      clientPort: 5173
-    }
+    port: 3001,
+    host: true
   },
-  optimizeDeps: {
-    include: ['@codemirror/state', '@codemirror/view', '@codemirror/commands']
+  build: {
+    // Добавьте настройки для билда
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['vue', 'vue-router'],
+          ui: ['axios']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000 // Увеличим лимит
   }
 })

@@ -14,7 +14,9 @@ services:
       - DB_NAME=trenager
       - MODE=local
       - JWT_SECRET=${JWT_SECRET}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - OPENROUTER_MODEL=${OPENROUTER_MODEL}
+      - AI_PROVIDER=${AI_PROVIDER}
     depends_on:
       - db
     restart: unless-stopped

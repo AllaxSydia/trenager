@@ -25,10 +25,10 @@
 </template>
 
 <script>
-import HeaderLogo from './HeaderLogo.vue'
-import HeaderNav from './HeaderNav.vue'
-import HeaderAuth from './HeaderAuth.vue'
-import HeaderMobile from './HeaderMobile.vue'
+import HeaderAuth from './HeaderAuth.vue';
+import HeaderLogo from './HeaderLogo.vue';
+import HeaderMobile from './HeaderMobile.vue';
+import HeaderNav from './HeaderNav.vue';
 
 export default {
   name: 'Header',
