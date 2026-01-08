@@ -7,28 +7,22 @@
       </button>
       <div class="dropdown-menu">
         <router-link to="/courses/python" class="dropdown-item">
-          <span class="lang-icon">🐍</span>
           <span>Python</span>
         </router-link>
         <router-link to="/courses/javascript" class="dropdown-item">
-          <span class="lang-icon">🟨</span>
           <span>JavaScript</span>
         </router-link>
         <router-link to="/courses/java" class="dropdown-item">
-          <span class="lang-icon">☕</span>
           <span>Java</span>
         </router-link>
         <router-link to="/courses/cpp" class="dropdown-item">
-          <span class="lang-icon">⚙️</span>
           <span>C++</span>
         </router-link>
         <router-link to="/courses/go" class="dropdown-item">
-          <span class="lang-icon">🐹</span>
           <span>Go</span>
         </router-link>
         <div class="dropdown-divider"></div>
         <router-link to="/" class="dropdown-item">
-          <span class="lang-icon">📚</span>
           <span>Все курсы</span>
         </router-link>
       </div>

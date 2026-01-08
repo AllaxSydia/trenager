@@ -3,7 +3,7 @@
     <div class="mobile-header-content">
       <h1 class="mobile-title">{{ title }}</h1>
       <button class="mobile-menu-btn" @click="$emit('toggle-sidebar')">
-        <span>📚 Все задания</span>
+        <span>Все задания</span>
       </button>
     </div>
     <div class="mobile-progress">

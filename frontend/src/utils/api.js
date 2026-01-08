@@ -358,22 +358,22 @@ export const api = {
   
   async analyzeCode(data) {
     try {
-      console.log('🤖 [API] Starting AI analysis...')
-      console.log('📝 Code length:', data.code?.length)
-      console.log('🌐 Language:', data.language)
-      console.log('📄 Task context:', data.task_context)
+      console.log('[API] Запуск AI-анализа...')
+      console.log('Длина кода:', data.code?.length)
+      console.log('Язык:', data.language)
+      console.log('Контекст задачи:', data.task_context)
       
       const headers = {
         'Content-Type': 'application/json',
       }
       
-      // Добавляем токен для AI анализа
+      // Добавляем токен для AI-анализа
       const token = localStorage.getItem('token')
       if (token) {
         headers['Authorization'] = `Bearer ${token}`
       }
       
-      console.log('📡 Sending request to /api/ai/review')
+      console.log('Отправка запроса к /api/ai/review')
       const response = await fetch(`${API_BASE}/ai/review`, {
         method: 'POST',
         headers: headers,
@@ -384,20 +384,20 @@ export const api = {
         })
       })
       
-      console.log('📨 Response status:', response.status, response.statusText)
+      console.log('Статус ответа:', response.status, response.statusText)
       
       if (!response.ok) {
         const errorText = await response.text()
-        console.error('❌ AI analysis failed:', errorText)
+        console.error('Ошибка AI-анализа:', errorText)
         throw new Error(`AI анализ не удался: ${response.status} - ${errorText}`)
       }
       
       const result = await response.json()
-      console.log('✅ AI analysis successful:', result)
+      console.log('AI-анализ успешно выполнен:', result)
       return result
       
     } catch (error) {
-      console.error('❌ AI Analysis API error:', error)
+      console.error('Ошибка API AI-анализа:', error)
       throw error
     }
   },

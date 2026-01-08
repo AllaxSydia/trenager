@@ -39,7 +39,7 @@
            class="mobile-nav-link" 
            @click.prevent="goToTasks"
            :class="{ 'mobile-nav-link--active': $route.name === 'teacher-tasks' }">
-          <span class="link-content">📋 Задачи</span>
+          <span class="link-content">Задачи</span>
         </a>
         
         <div v-if="isLoggedIn" class="mobile-profile-section">
@@ -54,7 +54,7 @@
                   @mousedown="setMobileLogoutActive(true)"
                   @mouseup="setMobileLogoutActive(false)"
                   @mouseleave="setMobileLogoutActive(false)">
-            <span class="dropdown-icon">🚪</span>Выйти
+            <span class="dropdown-icon">Выход</span>
           </button>
         </div>
         

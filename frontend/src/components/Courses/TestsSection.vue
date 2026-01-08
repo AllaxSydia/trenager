@@ -20,10 +20,10 @@
         <div class="test-header">
           <span class="test-number">Тест {{ index + 1 }}</span>
           <span class="test-status">
-            <span v-if="test.status === 'passed'">✅</span>
-            <span v-else-if="test.status === 'failed'">❌</span>
-            <span v-else-if="test.status === 'running'">⏳</span>
-            <span v-else>⏸️</span>
+            <span v-if="test.status === 'passed'">Пройден</span>
+            <span v-else-if="test.status === 'failed'">Ошибка</span>
+            <span v-else-if="test.status === 'running'">Выполняется</span>
+            <span v-else>Ожидание</span>
           </span>
         </div>
 
@@ -36,7 +36,7 @@
             <strong>Ожидается:</strong> {{ test.expected_output }}
           </div>
 
-          <div class="test-actual" v-if="test.status === 'failed' && test.actual">
+          <div class="test-actual" v-if="test.actual !== null && test.actual !== undefined">
             <strong>Получено:</strong> {{ test.actual }}
           </div>
 
@@ -112,8 +112,9 @@ export default {
 
 .test-item {
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
-  gap: 0.75rem;
+  gap: 0;
   padding: 1rem;
   background: #1E1E1E;
   border-radius: 12px;
@@ -145,6 +146,49 @@ export default {
 .test-item--running {
   border-color: #F59E0B;
   background: rgba(245, 158, 11, 0.05);
+}
+
+.test-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #404040;
+  width: 100%;
+}
+
+.test-number {
+  font-weight: 600;
+  color: #F8FAFC;
+  font-size: 0.95rem;
+}
+
+.test-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.test-item:not(.passed):not(.failed):not(.running) .test-status {
+  color: #94A3B8;
+  background: rgba(148, 163, 184, 0.1);
+}
+
+.test-item.passed .test-status {
+  color: #3B82F6;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.test-item.failed .test-status {
+  color: #EF4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.test-item.running .test-status {
+  color: #F59E0B;
+  background: rgba(245, 158, 11, 0.1);
 }
 
 .test-icon {
@@ -184,11 +228,18 @@ export default {
   font-size: 0.875rem;
 }
 
+.test-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
 .test-input,
 .test-expected,
 .test-actual,
 .test-error {
-  margin-bottom: 0.25rem;
+  margin-bottom: 0;
+  line-height: 1.5;
 }
 
 .test-input strong,

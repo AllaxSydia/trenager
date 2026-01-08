@@ -1,27 +1,29 @@
 <template>
   <div class="teacher-tasks-page">
-    <!-- Хедер -->
-    <div class="page-header">
-      <div class="header-content">
-        <h1>📝 Создание задач</h1>
-        <p class="subtitle">Панель учителя для создания и управления заданиями</p>
-        
-        <div class="header-actions">
-          <button @click="goBack" class="btn btn-secondary">
-            ← Назад
-          </button>
-          <div class="user-info">
-            <span class="username">{{ userEmail }}</span>
-            <span class="role-badge">👨‍🏫 Учитель</span>
+    <main class="main">
+      <div class="container">
+        <!-- Хедер -->
+        <div class="page-header">
+          <div class="header-content">
+            <h1>Создание задач</h1>
+            <p class="subtitle">Панель учителя для создания и управления заданиями</p>
+            
+            <div class="header-actions">
+              <button @click="goBack" class="btn btn-secondary">
+                ← Назад
+              </button>
+              <div class="user-info">
+                <span class="username">{{ userEmail }}</span>
+                <span class="role-badge">Учитель</span>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Основной контент -->
-    <div class="tasks-container">
-      <!-- Левая колонка - создание задачи -->
-      <div class="create-task-section">
+        <!-- Основной контент -->
+        <div class="tasks-container">
+          <!-- Левая колонка - создание задачи -->
+          <div class="create-task-section">
         <div class="section-card">
           <h2>Создать новую задачу</h2>
           
@@ -136,14 +138,14 @@
               :disabled="!isFormValid"
               class="btn btn-primary btn-large"
             >
-              💾 Сохранить задачу
+              Сохранить задачу
             </button>
             
             <button 
               @click="resetForm" 
               class="btn btn-outline"
             >
-              🗑️ Очистить форму
+              Очистить форму
             </button>
             
             <button 
@@ -151,7 +153,7 @@
               :disabled="!isFormValid"
               class="btn btn-info"
             >
-              👁️ Предпросмотр
+              Предпросмотр
             </button>
           </div>
         </div>
@@ -197,21 +199,21 @@
               <p class="task-description">{{ truncateText(task.description, 100) }}</p>
               
               <div class="task-footer">
-                <span class="task-tests">🧪 {{ task.tests?.length || 0 }} тестов</span>
+                <span class="task-tests">Тесты: {{ task.tests?.length || 0 }}</span>
                 <div class="task-actions">
                   <button 
                     @click.stop="editTask(task)"
                     class="btn-icon"
                     title="Редактировать"
                   >
-                    ✏️
+                    Ред.
                   </button>
                   <button 
                     @click.stop="deleteTask(task.id)"
                     class="btn-icon btn-icon--danger"
                     title="Удалить"
                   >
-                    🗑️
+                    Удал.
                   </button>
                 </div>
               </div>
@@ -219,7 +221,9 @@
           </div>
         </div>
       </div>
-    </div>
+        </div>
+      </div>
+    </main>
 
     <!-- Модалка предпросмотра -->
     <div v-if="showPreview" class="modal-overlay" @click="showPreview = false">
@@ -605,32 +609,39 @@ export default {
 <style scoped>
 .teacher-tasks-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  color: #e2e8f0;
-  padding: 20px;
+  background-color: #0E1117;
+  color: #E2E8F0;
+}
+
+.main {
+  padding: 2rem 0;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
 /* Хедер */
 .page-header {
-  background: rgba(30, 41, 59, 0.8);
-  border-radius: 12px;
-  padding: 1.5rem 2rem;
+  background-color: #303030;
+  border-radius: 16px;
+  padding: 1.25rem 2rem;
   margin-bottom: 2rem;
-  border: 1px solid #334155;
+  border: 1px solid #404040;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
 .header-content h1 {
   margin: 0;
   font-size: 2rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #60a5fa, #3b82f6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-weight: 600;
+  color: #E2E8F0;
 }
 
 .subtitle {
-  color: #94a3b8;
+  color: #9CA3AF;
   margin: 0.5rem 0 1.5rem;
 }
 
@@ -665,24 +676,24 @@ export default {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
-  max-width: 1600px;
-  margin: 0 auto;
 }
 
 /* Карточки */
 .section-card {
-  background: rgba(30, 41, 59, 0.8);
-  border-radius: 12px;
-  padding: 1.5rem;
-  border: 1px solid #334155;
+  background-color: #303030;
+  border-radius: 16px;
+  padding: 1.25rem;
+  border: 1px solid #404040;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
   height: fit-content;
 }
 
 .section-card h2 {
   margin-top: 0;
   margin-bottom: 1.5rem;
-  color: #f8fafc;
+  color: #F8FAFC;
   font-size: 1.5rem;
+  font-weight: 600;
 }
 
 /* Форма */
@@ -705,23 +716,24 @@ export default {
 }
 
 .lang-btn {
-  background: #1e293b;
-  border: 1px solid #475569;
-  color: #94a3b8;
+  background: #1E1E1E;
+  border: 1px solid #404040;
+  color: #9CA3AF;
   padding: 0.5rem 1rem;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .lang-btn:hover {
-  background: #334155;
-  color: #e2e8f0;
+  background: #252525;
+  color: #E2E8F0;
+  border-color: #505050;
 }
 
 .lang-btn--active {
-  background: #3b82f6;
-  border-color: #3b82f6;
+  background: #3B82F6;
+  border-color: #3B82F6;
   color: white;
 }
 
@@ -730,43 +742,61 @@ export default {
 .form-textarea,
 .code-editor {
   width: 100%;
-  background: #0f172a;
-  border: 1px solid #475569;
-  color: #e2e8f0;
-  border-radius: 6px;
+  background: #1E1E1E;
+  border: 1px solid #404040;
+  color: #E2E8F0;
+  border-radius: 8px;
   padding: 0.75rem;
   font-family: 'Monaco', 'Consolas', monospace;
   font-size: 0.9rem;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder,
+.code-editor::placeholder {
+  color: #6B7280;
 }
 
 .form-input:focus,
 .form-textarea:focus,
 .code-editor:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: #3B82F6;
+  background: #252525;
 }
 
-.form-textarea,
-.code-editor {
+.form-textarea {
   resize: vertical;
   min-height: 100px;
+  font-family: inherit;
+}
+
+.code-editor {
+  resize: vertical;
+  min-height: 200px;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.form-textarea::placeholder {
+  color: #6B7280;
 }
 
 .code-editor-wrapper {
-  background: #0f172a;
-  border-radius: 6px;
+  background: #1E1E1E;
+  border-radius: 12px;
   overflow: hidden;
+  border: 1px solid #404040;
 }
 
 .editor-header {
-  background: #1e293b;
+  background: #252525;
   padding: 0.5rem 0.75rem;
-  border-bottom: 1px solid #334155;
+  border-bottom: 1px solid #404040;
 }
 
 .editor-title {
-  color: #94a3b8;
+  color: #9CA3AF;
   font-size: 0.85rem;
   font-weight: 500;
 }
@@ -781,11 +811,20 @@ export default {
 
 .no-tests {
   background: rgba(255, 255, 255, 0.05);
-  border: 1px dashed #475569;
-  border-radius: 6px;
+  border: 1px dashed #404040;
+  border-radius: 12px;
   padding: 1.5rem;
   text-align: center;
-  color: #94a3b8;
+  color: #9CA3AF;
+}
+
+.no-tasks {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed #404040;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  color: #9CA3AF;
 }
 
 .tests-list {
@@ -795,9 +834,9 @@ export default {
 }
 
 .test-item {
-  background: #0f172a;
-  border: 1px solid #475569;
-  border-radius: 8px;
+  background: #1E1E1E;
+  border: 1px solid #404040;
+  border-radius: 12px;
   padding: 1rem;
 }
 
@@ -832,14 +871,25 @@ export default {
 
 .test-input {
   width: 100%;
-  background: #1e293b;
-  border: 1px solid #334155;
-  color: #e2e8f0;
-  border-radius: 4px;
+  background: #252525;
+  border: 1px solid #404040;
+  color: #E2E8F0;
+  border-radius: 8px;
   padding: 0.5rem;
   font-family: 'Monaco', 'Consolas', monospace;
   font-size: 0.85rem;
   resize: vertical;
+  transition: all 0.2s;
+}
+
+.test-input::placeholder {
+  color: #6B7280;
+}
+
+.test-input:focus {
+  outline: none;
+  border-color: #3B82F6;
+  background: #2A2A2A;
 }
 
 /* Кнопки действий формы */
@@ -848,7 +898,7 @@ export default {
   gap: 1rem;
   margin-top: 2rem;
   padding-top: 1.5rem;
-  border-top: 1px solid #334155;
+  border-top: 1px solid #404040;
 }
 
 /* Существующие задачи */
@@ -860,16 +910,23 @@ export default {
 }
 
 .filter-select {
-  background: #0f172a;
-  border: 1px solid #475569;
-  color: #e2e8f0;
+  background: #1E1E1E;
+  border: 1px solid #404040;
+  color: #E2E8F0;
   padding: 0.5rem 1rem;
-  border-radius: 6px;
+  border-radius: 8px;
   min-width: 150px;
+  transition: all 0.2s;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #3B82F6;
+  background: #252525;
 }
 
 .tasks-count {
-  color: #94a3b8;
+  color: #9CA3AF;
   font-size: 0.9rem;
 }
 
@@ -883,22 +940,23 @@ export default {
 }
 
 .task-card {
-  background: #0f172a;
-  border: 1px solid #475569;
-  border-radius: 8px;
+  background: #1E1E1E;
+  border: 1px solid #404040;
+  border-radius: 12px;
   padding: 1rem;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .task-card:hover {
-  border-color: #60a5fa;
+  border-color: #3B82F6;
   transform: translateY(-1px);
+  background: #252525;
 }
 
 .task-card--selected {
-  border-color: #3b82f6;
-  background: rgba(59, 130, 246, 0.05);
+  border-color: #3B82F6;
+  background: rgba(59, 130, 246, 0.1);
 }
 
 .task-header {
@@ -917,18 +975,18 @@ export default {
 }
 
 .task-date {
-  color: #94a3b8;
+  color: #9CA3AF;
   font-size: 0.85rem;
 }
 
 .task-title {
   margin: 0 0 0.5rem;
-  color: #f8fafc;
+  color: #F8FAFC;
   font-size: 1.1rem;
 }
 
 .task-description {
-  color: #94a3b8;
+  color: #9CA3AF;
   font-size: 0.9rem;
   line-height: 1.4;
   margin-bottom: 0.75rem;
@@ -941,7 +999,7 @@ export default {
 }
 
 .task-tests {
-  color: #60a5fa;
+  color: #3B82F6;
   font-size: 0.85rem;
   font-weight: 500;
 }
@@ -954,7 +1012,7 @@ export default {
 .btn-icon {
   background: none;
   border: none;
-  color: #94a3b8;
+  color: #9CA3AF;
   cursor: pointer;
   font-size: 1.1rem;
   padding: 0.25rem;
@@ -963,7 +1021,7 @@ export default {
 }
 
 .btn-icon:hover {
-  color: #e2e8f0;
+  color: #E2E8F0;
   background: rgba(255, 255, 255, 0.05);
 }
 
@@ -987,13 +1045,14 @@ export default {
 }
 
 .modal-content {
-  background: #1e293b;
-  border-radius: 12px;
+  background: #303030;
+  border-radius: 16px;
   width: 90%;
   max-width: 800px;
   max-height: 90vh;
   overflow-y: auto;
-  border: 1px solid #475569;
+  border: 1px solid #404040;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
 .modal-header {
@@ -1001,18 +1060,19 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid #334155;
+  border-bottom: 1px solid #404040;
 }
 
 .modal-header h2 {
   margin: 0;
-  color: #f8fafc;
+  color: #F8FAFC;
+  font-weight: 600;
 }
 
 .btn-close {
   background: none;
   border: none;
-  color: #94a3b8;
+  color: #9CA3AF;
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0;
@@ -1022,11 +1082,12 @@ export default {
   align-items: center;
   justify-content: center;
   border-radius: 4px;
+  transition: all 0.2s;
 }
 
 .btn-close:hover {
   background: rgba(255, 255, 255, 0.05);
-  color: #e2e8f0;
+  color: #E2E8F0;
 }
 
 .modal-body {
@@ -1039,7 +1100,7 @@ export default {
 }
 
 .preview-language {
-  color: #60a5fa;
+  color: #3B82F6;
   margin-bottom: 1.5rem;
 }
 
@@ -1048,15 +1109,16 @@ export default {
 }
 
 .preview-section h4 {
-  color: #cbd5e1;
+  color: #E2E8F0;
   margin: 0 0 0.5rem;
+  font-weight: 500;
 }
 
 .preview-description,
 .preview-code {
-  background: #0f172a;
-  border: 1px solid #334155;
-  border-radius: 6px;
+  background: #1E1E1E;
+  border: 1px solid #404040;
+  border-radius: 12px;
   padding: 1rem;
   margin: 0;
   white-space: pre-wrap;
@@ -1076,9 +1138,9 @@ export default {
 }
 
 .preview-test {
-  background: #0f172a;
-  border: 1px solid #334155;
-  border-radius: 6px;
+  background: #1E1E1E;
+  border: 1px solid #404040;
+  border-radius: 12px;
   padding: 0.75rem;
 }
 
@@ -1093,7 +1155,7 @@ export default {
 
 .modal-footer {
   padding: 1.5rem;
-  border-top: 1px solid #334155;
+  border-top: 1px solid #404040;
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
@@ -1101,33 +1163,41 @@ export default {
 
 /* Кнопки */
 .btn {
-  padding: 0.5rem 1rem;
+  padding: 0.7rem 1.1rem;
   border: none;
-  border-radius: 6px;
-  font-weight: 500;
+  border-radius: 10px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
-  font-size: 0.9rem;
+  transition: all 0.15s ease;
+  font-size: 0.85rem;
 }
 
 .btn-sm {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.8rem;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.7rem;
+  border-radius: 8px;
 }
 
 .btn-large {
   padding: 0.75rem 1.5rem;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: #3B82F6;
   color: white;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  transform: translateY(-1px);
+  background: #2563EB;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
 }
 
 .btn-primary:disabled {
@@ -1136,50 +1206,88 @@ export default {
 }
 
 .btn-secondary {
-  background: #475569;
-  color: white;
+  background: #303030;
+  color: #E2E8F0;
+  border: 1px solid #404040;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .btn-secondary:hover {
-  background: #334155;
+  background: #404040;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+.btn-secondary:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 .btn-success {
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: #10B981;
   color: white;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
 .btn-success:hover {
-  background: linear-gradient(135deg, #059669, #047857);
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.btn-success:active {
+  transform: translateY(0);
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: #EF4444;
   color: white;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 
 .btn-danger:hover {
-  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  background: #DC2626;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.btn-danger:active {
+  transform: translateY(0);
 }
 
 .btn-info {
-  background: linear-gradient(135deg, #06b6d4, #0891b2);
+  background: #06B6D4;
   color: white;
+  box-shadow: 0 2px 8px rgba(6, 182, 212, 0.3);
 }
 
 .btn-info:hover {
-  background: linear-gradient(135deg, #0891b2, #0e7490);
+  background: #0891B2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
+}
+
+.btn-info:active {
+  transform: translateY(0);
 }
 
 .btn-outline {
-  background: transparent;
-  border: 1px solid #475569;
-  color: #94a3b8;
+  background: #303030;
+  color: #E2E8F0;
+  border: 1px solid #404040;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .btn-outline:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #e2e8f0;
+  background: #404040;
+  color: #E2E8F0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+.btn-outline:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Адаптация */
@@ -1190,16 +1298,22 @@ export default {
 }
 
 @media (max-width: 768px) {
-  .teacher-tasks-page {
-    padding: 10px;
+  .container {
+    padding: 0 10px;
+  }
+  
+  .main {
+    padding: 1.5rem 0;
   }
   
   .page-header {
     padding: 1rem;
+    border-radius: 12px;
   }
   
   .section-card {
     padding: 1rem;
+    border-radius: 12px;
   }
   
   .test-inputs {
@@ -1212,6 +1326,7 @@ export default {
   
   .modal-content {
     width: 95%;
+    border-radius: 12px;
   }
 }
 

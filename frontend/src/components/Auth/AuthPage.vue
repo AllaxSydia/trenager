@@ -148,9 +148,9 @@
     <transition name="toast-slide">
       <div v-if="toast.show" :class="['toast', `toast--${toast.type}`]" @click="hideToast">
         <div class="toast-icon">
-          <span v-if="toast.type === 'error'">⚠️</span>
-          <span v-else-if="toast.type === 'success'">✅</span>
-          <span v-else>ℹ️</span>
+          <span v-if="toast.type === 'error'">Ошибка</span>
+          <span v-else-if="toast.type === 'success'">Успех</span>
+          <span v-else>Инфо</span>
         </div>
         <div class="toast-content">
           <div class="toast-title">{{ toast.title }}</div>

@@ -20,7 +20,7 @@
         @click="$emit('analyze')"
         :disabled="aiLoading"
       >
-        🤖 AI Анализ
+        AI анализ
       </button>
       <button 
         class="btn btn--success" 

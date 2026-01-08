@@ -3,7 +3,7 @@
     <div class="settings-container">
       <!-- Хедер -->
       <div class="settings-header">
-        <h1>⚙️ Настройки</h1>
+        <h1>Настройки</h1>
         <p>Управление вашим аккаунтом и настройками платформы</p>
       </div>
 
@@ -12,7 +12,7 @@
         <!-- Левая колонка - настройки аккаунта -->
         <div class="settings-section">
           <div class="section-card">
-            <h2>👤 Настройки аккаунта</h2>
+            <h2>Настройки аккаунта</h2>
             
             <div class="form-group">
               <label class="form-label">Имя пользователя</label>
@@ -48,10 +48,10 @@
             
             <div class="form-actions">
               <button @click="saveProfile" class="btn btn-primary">
-                💾 Сохранить изменения
+                Сохранить изменения
               </button>
               <button @click="logout" class="btn btn-outline">
-                🚪 Выйти
+                Выйти
               </button>
             </div>
           </div>
@@ -60,7 +60,7 @@
         <!-- Правая колонка - настройки платформы -->
         <div class="settings-section">
           <div class="section-card">
-            <h2>🎨 Настройки интерфейса</h2>
+            <h2>Настройки интерфейса</h2>
             
             <div class="form-group">
               <label class="form-label">Тема оформления</label>
@@ -161,7 +161,7 @@
           
           <!-- Статистика -->
           <div class="section-card">
-            <h2>📊 Статистика</h2>
+            <h2>Статистика</h2>
             
             <div class="stats-grid">
               <div class="stat-item">
@@ -381,36 +381,30 @@ export default {
 <style scoped>
 .settings-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  color: #e2e8f0;
-  padding: 20px;
+  background-color: #0E1117;
+  color: #E2E8F0;
 }
 
 .settings-container {
   max-width: 1200px;
   margin: 0 auto;
+  padding: 2rem 20px;
 }
 
 .settings-header {
   text-align: center;
-  margin-bottom: 40px;
-  padding: 20px;
-  background: rgba(30, 41, 59, 0.8);
-  border-radius: 12px;
-  border: 1px solid #334155;
+  margin-bottom: 3rem;
 }
 
 .settings-header h1 {
   margin: 0;
   font-size: 2.5rem;
-  background: linear-gradient(135deg, #60a5fa, #3b82f6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #E2E8F0;
+  font-weight: 600;
 }
 
 .settings-header p {
-  color: #94a3b8;
+  color: #9CA3AF;
   margin-top: 10px;
   font-size: 1.1rem;
 }
@@ -418,66 +412,74 @@ export default {
 .settings-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 30px;
+  gap: 2rem;
 }
 
 .settings-section {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 1.5rem;
 }
 
 .section-card {
-  background: rgba(30, 41, 59, 0.8);
-  border-radius: 12px;
-  padding: 25px;
-  border: 1px solid #334155;
+  background-color: #303030;
+  border-radius: 16px;
+  padding: 1.25rem;
+  border: 1px solid #404040;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
 .section-card h2 {
   margin-top: 0;
-  margin-bottom: 25px;
-  color: #f8fafc;
+  margin-bottom: 1.5rem;
+  color: #F8FAFC;
   font-size: 1.3rem;
+  font-weight: 600;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
 }
 
 .form-label {
   display: block;
-  margin-bottom: 8px;
-  color: #cbd5e1;
+  margin-bottom: 0.5rem;
+  color: #E2E8F0;
   font-weight: 500;
 }
 
 .form-input,
 .form-select {
   width: 100%;
-  background: #0f172a;
-  border: 1px solid #475569;
-  color: #e2e8f0;
-  border-radius: 6px;
-  padding: 12px;
-  font-size: 1rem;
-  transition: border-color 0.2s;
+  background: #1E1E1E;
+  border: 1px solid #404040;
+  color: #E2E8F0;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.form-input::placeholder {
+  color: #6B7280;
 }
 
 .form-input:focus,
 .form-select:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: #3B82F6;
+  background: #252525;
 }
 
 .role-display {
   display: flex;
   align-items: center;
-  gap: 15px;
-  padding: 12px;
-  background: #0f172a;
-  border-radius: 6px;
-  border: 1px solid #475569;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: #1E1E1E;
+  border-radius: 12px;
+  border: 1px solid #404040;
 }
 
 .role-badge {
@@ -504,17 +506,17 @@ export default {
 }
 
 .role-description {
-  color: #94a3b8;
+  color: #9CA3AF;
   font-size: 0.9rem;
   flex: 1;
 }
 
 .form-actions {
   display: flex;
-  gap: 15px;
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid #334155;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #404040;
 }
 
 /* Темы */
@@ -525,13 +527,14 @@ export default {
 }
 
 .theme-btn {
-  padding: 12px;
+  padding: 0.75rem;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
   transition: all 0.2s;
   border: 2px solid transparent;
+  font-size: 0.9rem;
 }
 
 .theme-btn:hover {
@@ -540,7 +543,7 @@ export default {
 }
 
 .theme-btn--active {
-  border-color: #3b82f6 !important;
+  border-color: #3B82F6 !important;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
 }
 
@@ -548,16 +551,16 @@ export default {
 .checkbox-group {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0.75rem;
 }
 
 .checkbox-label,
 .radio-label {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0.75rem;
   cursor: pointer;
-  color: #cbd5e1;
+  color: #E2E8F0;
 }
 
 .checkbox,
@@ -579,77 +582,100 @@ export default {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
-  margin-bottom: 20px;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .stat-item {
-  background: #0f172a;
-  border: 1px solid #334155;
-  border-radius: 8px;
-  padding: 15px;
+  background: #1E1E1E;
+  border: 1px solid #404040;
+  border-radius: 12px;
+  padding: 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
 .stat-label {
-  color: #94a3b8;
+  color: #9CA3AF;
   font-size: 0.85rem;
-  margin-bottom: 5px;
+  margin-bottom: 0.5rem;
   text-align: center;
 }
 
 .stat-value {
-  color: #3b82f6;
+  color: #3B82F6;
   font-size: 1.5rem;
   font-weight: 700;
 }
 
 /* Кнопки */
 .btn {
-  padding: 12px 24px;
+  padding: 0.7rem 1.1rem;
   border: none;
-  border-radius: 8px;
-  font-weight: 500;
+  border-radius: 10px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
-  font-size: 1rem;
+  transition: all 0.15s ease;
+  font-size: 0.85rem;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: #3B82F6;
   color: white;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  transform: translateY(-1px);
+  background: #2563EB;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
 }
 
 .btn-outline {
-  background: transparent;
-  border: 1px solid #475569;
-  color: #94a3b8;
+  background: #303030;
+  color: #E2E8F0;
+  border: 1px solid #404040;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .btn-outline:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #e2e8f0;
+  background: #404040;
+  color: #E2E8F0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+.btn-outline:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: #EF4444;
   color: white;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 
 .btn-danger:hover {
-  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  background: #DC2626;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.btn-danger:active {
+  transform: translateY(0);
 }
 
 .btn-sm {
-  padding: 8px 16px;
-  font-size: 0.9rem;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.7rem;
+  border-radius: 8px;
 }
 
 /* Адаптация */
@@ -676,16 +702,17 @@ export default {
 }
 
 @media (max-width: 480px) {
-  .settings-page {
-    padding: 10px;
+  .settings-container {
+    padding: 1rem 10px;
   }
   
   .section-card {
-    padding: 20px;
+    padding: 1rem;
+    border-radius: 12px;
   }
   
-  .settings-header {
-    padding: 15px;
+  .settings-header h1 {
+    font-size: 2rem;
   }
 }
 </style>

@@ -21,7 +21,7 @@
                   @mousedown="setLogoutActive(true)"
                   @mouseup="setLogoutActive(false)"
                   @mouseleave="setLogoutActive(false)">
-            <span class="dropdown-icon">🚪</span>Выйти
+            <span class="dropdown-icon">Выход</span>
           </button>
         </div>
       </transition>

@@ -250,7 +250,7 @@ export default {
         if (tasks && tasks.length > 0) {
           // Форматируем задачи в уроки
           this.internalLessons = this.formatLessons(tasks)
-          console.log(`✅ Загружено ${tasks.length} задач`)
+          console.log(`Успешно загружено ${tasks.length} задач`)
           this.ensureLessonSelected()
         } else {
           // Используем статические уроки
@@ -363,7 +363,7 @@ export default {
       try {
         const health = await api.healthCheck()
         if (health.status === 'healthy' || health.status === 'api_healthy') {
-          this.consoleOutput += '✅ Все системы работают нормально\n'
+          this.consoleOutput += 'Все системы работают нормально\n'
         }
       } catch (error) {
         console.log('Бэкенд недоступен:', error.message)
@@ -407,7 +407,7 @@ export default {
 
     resetCode() {
       this.userCode = this.currentLesson?.starterCode || this.currentLesson?.code || ''
-      this.consoleOutput = '🔄 Код сброшен к начальному состоянию\n'
+      this.consoleOutput = 'Код сброшен к начальному состоянию\n'
     },
 
     executeCode() {
@@ -416,12 +416,12 @@ export default {
 
     async runCode() {
       if (!this.userCode?.trim()) {
-        this.consoleOutput = '❌ Введите код для выполнения\n'
+        this.consoleOutput = 'Введите код для выполнения\n'
         return
       }
 
       this.isRunning = true
-      this.consoleOutput = '🚀 Выполнение кода...\n\n'
+      this.consoleOutput = 'Выполнение кода...\n\n'
 
       try {
         const inputs = this.consoleInput.trim() ? [this.consoleInput] : []
@@ -433,12 +433,12 @@ export default {
         })
         
         if (result.success) {
-          this.consoleOutput += `✅ Успешно!\n${result.output || 'Программа выполнена без вывода'}\n`
+          this.consoleOutput += `Успешно!\n${result.output || 'Программа выполнена без вывода'}\n`
         } else {
-          this.consoleOutput += `❌ Ошибка выполнения:\n${result.output || result.message}\n`
+          this.consoleOutput += `Ошибка выполнения:\n${result.output || result.message}\n`
         }
       } catch (error) {
-        this.consoleOutput += `❌ Ошибка соединения: ${error.message}\n`
+        this.consoleOutput += `Ошибка соединения: ${error.message}\n`
       } finally {
         this.isRunning = false
       }
@@ -446,21 +446,21 @@ export default {
 
     async analyzeWithAI() {
       if (!this.userCode?.trim()) {
-        console.log('❌ Нет кода для анализа')
-        this.consoleOutput += '\n❌ Введите код для AI анализа\n'
+        console.log('Нет кода для анализа')
+        this.consoleOutput += '\nВведите код для AI анализа\n'
         return
       }
       
       if (this.aiLoading) {
-        console.log('⚠️ AI анализ уже выполняется')
+        console.log('AI анализ уже выполняется')
         return
       }
       
-      console.log('🚀 Запуск AI анализа...')
+      console.log('Запуск AI анализа...')
       
       this.aiLoading = true
       this.aiResult = null  // Сбрасываем предыдущий результат
-      this.consoleOutput += '\n🤖 Запуск AI анализа кода...\n'
+      this.consoleOutput += '\nЗапуск AI анализа кода...\n'
 
       try {
         const aiResult = await api.analyzeCode({
@@ -469,19 +469,19 @@ export default {
           task_context: this.currentLesson?.description || 'Анализ кода студента'
         })
         
-        console.log('✅ AI анализ завершен, результат:', aiResult)
+        console.log('AI анализ завершен, результат:', aiResult)
         
         if (aiResult && aiResult.score !== undefined) {
           this.aiResult = aiResult  // Сохраняем результат для UI
           this.formatAIResponse(aiResult)  // Также выводим в консоль
         } else {
-          console.error('❌ Неверный формат ответа от AI:', aiResult)
-          this.consoleOutput += '\n❌ Ошибка: неверный формат ответа от AI\n'
+          console.error('Неверный формат ответа от AI:', aiResult)
+          this.consoleOutput += '\nОшибка: неверный формат ответа от AI\n'
         }
         
       } catch (error) {
-        console.error('❌ AI анализ ошибка:', error)
-        this.consoleOutput += `\n❌ Ошибка AI анализа: ${error.message}\n`
+        console.error('Ошибка AI-анализа:', error)
+        this.consoleOutput += `\nОшибка AI анализа: ${error.message}\n`
       } finally {
         this.aiLoading = false
       }
@@ -489,22 +489,17 @@ export default {
 
     formatAIResponse(aiData) {
       this.consoleOutput += '='.repeat(50) + '\n'
-      this.consoleOutput += '🤖 AI АНАЛИЗ КОДА:\n'
+      this.consoleOutput += 'AI АНАЛИЗ КОДА:\n'
       this.consoleOutput += '='.repeat(50) + '\n\n'
       
       // Оценка
       const score = aiData.score || 0
-      let scoreEmoji = '⭐'
-      if (score >= 8) scoreEmoji = '🌟'
-      else if (score >= 6) scoreEmoji = '⭐'
-      else scoreEmoji = '⚠️'
-      
-      this.consoleOutput += `${scoreEmoji} ОЦЕНКА: ${score}/10\n`
-      this.consoleOutput += `📊 СЛОЖНОСТЬ: ${aiData.complexity || 'неизвестно'}\n\n`
+      this.consoleOutput += `ОЦЕНКА: ${score}/10\n`
+      this.consoleOutput += `СЛОЖНОСТЬ: ${aiData.complexity || 'неизвестно'}\n\n`
       
       // Комментарии
       if (aiData.comments && aiData.comments.length > 0) {
-        this.consoleOutput += '💬 КОММЕНТАРИИ:\n'
+        this.consoleOutput += 'КОММЕНТАРИИ:\n'
         aiData.comments.forEach((comment, index) => {
           this.consoleOutput += `  ${index + 1}. ${comment}\n`
         })
@@ -522,7 +517,7 @@ export default {
       
       // Best Practices
       if (aiData.best_practices && aiData.best_practices.length > 0) {
-        this.consoleOutput += '🏆 BEST PRACTICES:\n'
+        this.consoleOutput += 'РЕКОМЕНДУЕМЫЕ ПРАКТИКИ:\n'
         aiData.best_practices.forEach((practice, index) => {
           this.consoleOutput += `  ${index + 1}. ${practice}\n`
         })
@@ -531,7 +526,7 @@ export default {
       
       // Альтернативные решения
       if (aiData.alternative_solutions && aiData.alternative_solutions.length > 0) {
-        this.consoleOutput += '🔄 АЛЬТЕРНАТИВНЫЕ РЕШЕНИЯ:\n'
+        this.consoleOutput += 'АЛЬТЕРНАТИВНЫЕ РЕШЕНИЯ:\n'
         aiData.alternative_solutions.forEach((solution, index) => {
           this.consoleOutput += `  ${index + 1}. ${solution}\n`
         })
@@ -539,17 +534,17 @@ export default {
       }
       
       this.consoleOutput += '='.repeat(50) + '\n'
-      this.consoleOutput += '✅ AI анализ завершен!\n'
+      this.consoleOutput += 'AI анализ завершен!\n'
     },
 
     async runTests() {
       if (!this.currentLesson?.tests || this.currentLesson.tests.length === 0) {
-        this.consoleOutput = 'ℹ️ Для этой задачи нет тестов\n'
+        this.consoleOutput = 'Для этой задачи нет тестов\n'
         return
       }
       
       this.isTesting = true
-      this.consoleOutput = '🧪 Запуск тестов...\n\n'
+      this.consoleOutput = 'Запуск тестов...\n\n'
 
       let passedCount = 0
 
@@ -575,25 +570,26 @@ export default {
           if (testPassed) {
             test.status = 'passed'
             passedCount++
-            this.consoleOutput += `✅ Тест ${i + 1}: Пройден\n`
+          this.consoleOutput += `Тест ${i + 1}: Пройден\n`
           } else {
             test.status = 'failed'
-            this.consoleOutput += `❌ Тест ${i + 1}: Не пройден\n`
+          this.consoleOutput += `Тест ${i + 1}: Не пройден\n`
           }
           
         } catch (error) {
           test.status = 'failed'
           test.error = error.message
-          this.consoleOutput += `❌ Тест ${i + 1}: Ошибка выполнения\n`
+          test.actual = '' // Устанавливаем пустую строку при ошибке
+        this.consoleOutput += `Тест ${i + 1}: Ошибка выполнения\n`
         }
         
         await new Promise(resolve => setTimeout(resolve, 500))
       }
       
-      this.consoleOutput += `📊 Итог: ${passedCount}/${this.currentLesson.tests.length} тестов пройдено\n`
+      this.consoleOutput += `Итог: ${passedCount}/${this.currentLesson.tests.length} тестов пройдено\n`
       
       if (passedCount === this.currentLesson.tests.length) {
-        this.consoleOutput += '🎉 Отлично! Все тесты пройдены!\n'
+        this.consoleOutput += 'Отлично! Все тесты пройдены!\n'
       }
       
       this.isTesting = false
@@ -603,7 +599,7 @@ export default {
       if (!this.currentLesson) return
       
       this.isSubmitting = true
-      this.consoleOutput = '📤 Проверка решения...\n\n'
+      this.consoleOutput = 'Проверка решения...\n\n'
       
       await this.runTests()
       
@@ -616,14 +612,14 @@ export default {
           this.internalLessons[lessonIndex].completed = true
           this.updateProgress()
         }
-        this.consoleOutput += '\n🎉 Поздравляем! Все тесты пройдены! Задача решена правильно.\n'
+        this.consoleOutput += '\nПоздравляем! Все тесты пройдены! Задача решена правильно.\n'
         
         // Автоматически запускаем AI анализ при успешной сдаче
         setTimeout(() => {
           this.analyzeWithAI()
         }, 1000)
       } else {
-        this.consoleOutput += '\n❌ Не все тесты пройдены. Продолжайте работать над решением!\n'
+        this.consoleOutput += '\nНе все тесты пройдены. Продолжайте работать над решением!\n'
       }
       
       this.isSubmitting = false
@@ -637,7 +633,7 @@ export default {
     saveCode() {
       if (!this.currentLesson) return
       localStorage.setItem(`${this.language}_lesson_${this.currentLesson.id}`, this.userCode)
-      this.consoleOutput = '💾 Код сохранен локально.\n'
+      this.consoleOutput = 'Код сохранен локально.\n'
     },
 
     loadSavedCode() {
