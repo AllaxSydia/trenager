@@ -16,13 +16,13 @@ func (e *LocalExecutor) Execute(code, language string) (map[string]interface{}, 
 
 	switch language {
 	case "python":
-		return e.runPython(code)
+		return e.runPython()
 	case "javascript":
-		return e.runJavaScript(code)
+		return e.runJavaScript()
 	case "cpp":
-		return e.runCpp(code)
+		return e.runCpp()
 	case "java":
-		return e.runJava(code)
+		return e.runJava()
 	default:
 		return map[string]interface{}{
 			"exitCode": 0,
@@ -32,7 +32,7 @@ func (e *LocalExecutor) Execute(code, language string) (map[string]interface{}, 
 	}
 }
 
-func (e *LocalExecutor) runPython(code string) (map[string]interface{}, error) {
+func (e *LocalExecutor) runPython() (map[string]interface{}, error) {
 	log.Printf("🐍 Simulating Python execution")
 
 	// Симуляция Python - всегда возвращаем Hello World для задачи 1
@@ -43,7 +43,7 @@ func (e *LocalExecutor) runPython(code string) (map[string]interface{}, error) {
 	}, nil
 }
 
-func (e *LocalExecutor) runJava(code string) (map[string]interface{}, error) {
+func (e *LocalExecutor) runJava() (map[string]interface{}, error) {
 	log.Printf("☕ Simulating Java execution")
 
 	// Симуляция Java - всегда возвращаем Hello World для задачи 1
@@ -54,7 +54,7 @@ func (e *LocalExecutor) runJava(code string) (map[string]interface{}, error) {
 	}, nil
 }
 
-func (e *LocalExecutor) runJavaScript(code string) (map[string]interface{}, error) {
+func (e *LocalExecutor) runJavaScript() (map[string]interface{}, error) {
 	log.Printf("📜 Simulating JavaScript execution")
 
 	// Симуляция JavaScript - всегда возвращаем Hello World для задачи 1
@@ -65,7 +65,7 @@ func (e *LocalExecutor) runJavaScript(code string) (map[string]interface{}, erro
 	}, nil
 }
 
-func (e *LocalExecutor) runCpp(code string) (map[string]interface{}, error) {
+func (e *LocalExecutor) runCpp() (map[string]interface{}, error) {
 	log.Printf("⚙️ Simulating C++ execution")
 
 	// Симуляция C++ - всегда возвращаем Hello World для задачи 1

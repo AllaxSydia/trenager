@@ -178,7 +178,6 @@ print(factorial(5))`,
 }
 
 // getTasksByLanguage возвращает задачи по языку
-// getTasksByLanguage возвращает задачи по языку
 func (h *TaskHandler) getTasksByLanguage(w http.ResponseWriter, language string) {
 	var allTasks []models.Task
 
@@ -479,7 +478,6 @@ func (h *TaskHandler) CreateTaskHandler(w http.ResponseWriter, r *http.Request) 
 	json.NewEncoder(w).Encode(response)
 }
 
-// GetTeacherTasksHandler возвращает задачи созданные учителем
 // GetTeacherTasksHandler возвращает задачи созданные учителем
 func (h *TaskHandler) GetTeacherTasksHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {

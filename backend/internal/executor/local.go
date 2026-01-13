@@ -35,9 +35,9 @@ func (e *LocalExecutor) Execute(code, language string, inputs []string) (map[str
 	case "javascript", "node":
 		return e.executeJavaScript(code, inputs)
 	case "cpp", "c++":
-		return e.executeCpp(code, inputs)
+		return e.executeCpp()
 	case "java":
-		return e.executeJava(code, inputs)
+		return e.executeJava()
 	default:
 		return map[string]interface{}{
 			"output":   "",
@@ -349,7 +349,7 @@ func (e *LocalExecutor) executeJavaScript(code string, inputs []string) (map[str
 	}
 }
 
-func (e *LocalExecutor) executeCpp(code string, inputs []string) (map[string]interface{}, error) {
+func (e *LocalExecutor) executeCpp() (map[string]interface{}, error) {
 	// ... (реализация как в предыдущей версии)
 	return map[string]interface{}{
 		"output":   "",
@@ -358,7 +358,7 @@ func (e *LocalExecutor) executeCpp(code string, inputs []string) (map[string]int
 	}, nil
 }
 
-func (e *LocalExecutor) executeJava(code string, inputs []string) (map[string]interface{}, error) {
+func (e *LocalExecutor) executeJava() (map[string]interface{}, error) {
 	// ... (реализация как в предыдущей версии)
 	return map[string]interface{}{
 		"output":   "",

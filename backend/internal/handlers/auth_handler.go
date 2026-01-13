@@ -142,7 +142,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Тестовые пользователи для быстрого входа (если нет в БД)
 	if email == "teacher@mail.com" && req.Password == "123456789" {
-		// Автоматический вход для тестового учителя
+		// Используйте ту же функцию generateToken, что и для реальных пользователей
 		token, err := generateToken(1, "teacher_avg", "teacher@mail.com", "teacher")
 		if err != nil {
 			log.Printf("token error for test teacher: %v", err)
@@ -154,13 +154,16 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Для отладки: декодируйте токен и покажите срок
+		log.Printf("🔐 Generated NEW token for test teacher at: %v", time.Now().Format("2006-01-02 15:04:05"))
+
 		res := authResponse{
 			Success:  true,
 			Token:    token,
 			Username: "teacher_avg",
 			Email:    "teacher@mail.com",
 			Role:     "teacher",
-			Message:  "Login successful (test teacher)",
+			Message:  "Login successful (test teacher) - NEW TOKEN",
 		}
 
 		w.WriteHeader(http.StatusOK)
