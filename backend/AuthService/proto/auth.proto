@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "auth-service/proto";
+
+import "google/protobuf/timestamp.proto";
+
+// ============ SERVICE ============
+service AuthService {
+  // Регистрация нового пользователя
+  rpc Register(RegisterRequest) returns (AuthResponse);
+  
+  // Авторизация пользователя
+  rpc Login(LoginRequest) returns (AuthResponse);
+  
+  // Обновление токенов
+  rpc Refresh(RefreshRequest) returns (AuthResponse);
+  
+  // Валидация access токена
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
+  
+  // Получение информации о пользователе
+  rpc GetUser(GetUserRequest) returns (UserResponse);
+  
+  // Проверка здоровья сервиса
+  rpc HealthCheck(HealthRequest) returns (HealthResponse);
+}
+
+// ============ REQUEST/RESPONSE MESSAGES ============
+
+// Запрос на регистрацию
+message RegisterRequest {
+  string username = 1;
+  string email = 2;
+  string password = 3;
+}
+
+// Запрос на авторизацию
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+// Запрос на обновление токенов
+message RefreshRequest {
+  string refresh_token = 1;
+}
+
+// Запрос на валидацию токена
+message ValidateTokenRequest {
+  string access_token = 1;
+}
+
+// Запрос на получение пользователя
+message GetUserRequest {
+  string user_id = 1;
+}
+
+// Запрос на проверку здоровья
+message HealthRequest {}
+
+// Ответ с токенами
+message AuthResponse {
+  bool success = 1;
+  string access_token = 2;
+  string refresh_token = 3;
+  int64 access_exp = 4;
+  int64 refresh_exp = 5;
+  User user = 6;
+  string message = 7;
+  string error = 8;
+}
+
+// Ответ на валидацию токена
+message ValidateTokenResponse {
+  bool valid = 1;
+  User user = 2;
+  string error = 3;
+}
+
+// Ответ с пользователем
+message UserResponse {
+  User user = 1;
+  string error = 2;
+}
+
+// Ответ на проверку здоровья
+message HealthResponse {
+  bool healthy = 1;
+  string status = 2;
+  string timestamp = 3;
+}
+
+// ============ DATA MODELS ============
+
+// Модель пользователя
+message User {
+  string id = 1;
+  string username = 2;
+  string email = 3;
+  string role = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
