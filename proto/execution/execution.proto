@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package execution;
+
+option go_package = "code-trainer/proto/execution";
+
+service ExecutionService {
+  rpc ExecuteCode(ExecuteCodeRequest) returns (ExecuteCodeResponse);
+  rpc ExecuteTest(ExecuteTestRequest) returns (ExecuteTestResponse);
+  rpc GetExecutionStatus(GetExecutionStatusRequest) returns (ExecutionStatus);
+}
+
+message ExecuteCodeRequest {
+  string code = 1;
+  string language = 2;
+  string input = 3;
+  int32 time_limit_ms = 4;
+  int32 memory_limit_mb = 5;
+}
+
+message ExecuteCodeResponse {
+  bool success = 1;
+  string output = 2;
+  string error = 3;
+  int64 execution_time_ms = 4;
+  int64 memory_used_bytes = 5;
+  string status = 6; // completed, timeout, memory_error, runtime_error
+}
+
+message ExecuteTestRequest {
+  string code = 1;
+  string language = 2;
+  repeated TestCase tests = 3;
+  int32 time_limit_ms = 4;
+  int32 memory_limit_mb = 5;
+}
+
+message TestCase {
+  string input = 1;
+  string expected_output = 2;
+}
+
+message TestResult {
+  string test_id = 1;
+  bool passed = 2;
+  string actual_output = 3;
+  string error = 4;
+  int64 execution_time_ms = 5;
+}
+
+message ExecuteTestResponse {
+  bool all_passed = 1;
+  repeated TestResult results = 2;
+  int32 passed_count = 3;
+  int32 total_count = 4;
+}
+
+message GetExecutionStatusRequest {
+  string execution_id = 1;
+}
+
+message ExecutionStatus {
+  string execution_id = 1;
+  string status = 2; // pending, running, completed, failed
+  string result = 3;
+  string error = 4;
+}

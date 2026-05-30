@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package ai;
+
+option go_package = "github.com/AllaxSydia/trenager/proto/ai";
+
+service AIService {
+  rpc GetHint(GetHintRequest) returns (GetHintResponse);
+  rpc ReviewCode(ReviewCodeRequest) returns (ReviewCodeResponse);
+  rpc GetRecommendations(GetRecommendationsRequest) returns (GetRecommendationsResponse);
+  rpc AskQuestion(AskQuestionRequest) returns (AskQuestionResponse);
+}
+
+message GetHintRequest {
+  string task_id = 1;
+  string user_code = 2;
+  string language = 3;
+  int32 hint_level = 4;
+}
+
+message GetHintResponse {
+  string hint = 1;
+  int32 hint_level = 2;
+  string example_code = 3;
+}
+
+message ReviewCodeRequest {
+  string code = 1;
+  string language = 2;
+  string task_description = 3;
+}
+
+message ReviewCodeResponse {
+  int32 quality_score = 1;
+  repeated string issues = 2;
+  repeated string suggestions = 3;
+  string overall_feedback = 4;
+}
+
+message GetRecommendationsRequest {
+  string user_id = 1;
+  repeated string completed_tasks = 2;
+  repeated string weak_topics = 3;
+}
+
+message GetRecommendationsResponse {
+  repeated TaskRecommendation recommendations = 1;
+}
+
+message TaskRecommendation {
+  string task_id = 1;
+  string title = 2;
+  string reason = 3;
+  float difficulty_score = 4;
+}
+
+message AskQuestionRequest {
+  string question = 1;
+  string code_context = 2;
+  string language = 3;
+}
+
+message AskQuestionResponse {
+  string answer = 1;
+  repeated string code_examples = 2;
+  bool has_code = 3;
+}

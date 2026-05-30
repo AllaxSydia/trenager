@@ -1,44 +1,37 @@
 package handler
 
 import (
-	"auth-service/internal/service"
-	pb "auth-service/proto"
 	"context"
 	"log"
 	"time"
 
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"auth-service/internal/service"
+
+	pb "github.com/AllaxSydia/trenager/proto/auth"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type GRPCHandler struct {
+type AuthHandler struct {
 	pb.UnimplementedAuthServiceServer
-	authService service.AuthService
+	authService *service.AuthService
 }
 
-func NewGRPCHandler(authService service.AuthService) *GRPCHandler {
-	return &GRPCHandler{
+func NewAuthHandler(authService *service.AuthService) *AuthHandler {
+	return &AuthHandler{
 		authService: authService,
 	}
 }
 
-func (h *GRPCHandler) Register(
-	ctx context.Context,
-	req *pb.RegisterRequest,
-) (*pb.AuthResponse, error) {
-	log.Printf("gRPC Register request: username=%s, email=%s", req.Username, req.Email)
+func (h *AuthHandler) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.AuthResponse, error) {
+	log.Printf("📝 Register: username=%s, email=%s", req.Username, req.Email)
 
 	user, tokens, err := h.authService.Register(ctx, req.Username, req.Email, req.Password)
 	if err != nil {
-		log.Printf("Register error: %v", err)
 		return &pb.AuthResponse{
 			Success: false,
 			Error:   err.Error(),
-		}, status.Error(codes.InvalidArgument, err.Error())
+		}, nil
 	}
-
-	log.Printf("Register successful: user_id=%s", user.ID.String())
 
 	return &pb.AuthResponse{
 		Success:      true,
@@ -54,26 +47,20 @@ func (h *GRPCHandler) Register(
 			CreatedAt: timestamppb.New(user.CreatedAt),
 			UpdatedAt: timestamppb.New(user.UpdatedAt),
 		},
-		Message: "Registration successful",
+		Message: "User registered successfully",
 	}, nil
 }
 
-func (h *GRPCHandler) Login(
-	ctx context.Context,
-	req *pb.LoginRequest,
-) (*pb.AuthResponse, error) {
-	log.Printf("gRPC Login request: email=%s", req.Email)
+func (h *AuthHandler) Login(ctx context.Context, req *pb.LoginRequest) (*pb.AuthResponse, error) {
+	log.Printf("🔐 Login: email=%s", req.Email)
 
 	user, tokens, err := h.authService.Login(ctx, req.Email, req.Password)
 	if err != nil {
-		log.Printf("Login error: %v", err)
 		return &pb.AuthResponse{
 			Success: false,
 			Error:   err.Error(),
-		}, status.Error(codes.Unauthenticated, err.Error())
+		}, nil
 	}
-
-	log.Printf("Login successful: user_id=%s", user.ID.String())
 
 	return &pb.AuthResponse{
 		Success:      true,
@@ -93,107 +80,54 @@ func (h *GRPCHandler) Login(
 	}, nil
 }
 
-func (h *GRPCHandler) Refresh(
-	ctx context.Context,
-	req *pb.RefreshRequest,
-) (*pb.AuthResponse, error) {
-	log.Printf("gRPC Refresh request")
+func (h *AuthHandler) Refresh(ctx context.Context, req *pb.RefreshRequest) (*pb.AuthResponse, error) {
+	log.Printf("🔄 Refresh token")
 
-	tokens, err := h.authService.RefreshTokens(ctx, req.RefreshToken)
-	if err != nil {
-		log.Printf("Refresh error: %v", err)
-		return &pb.AuthResponse{
-			Success: false,
-			Error:   err.Error(),
-		}, status.Error(codes.Unauthenticated, err.Error())
-	}
-
-	log.Printf("Refresh successful")
-
+	// TODO: Implement refresh logic
 	return &pb.AuthResponse{
-		Success:      true,
-		AccessToken:  tokens.AccessToken,
-		RefreshToken: tokens.RefreshToken,
-		AccessExp:    tokens.AccessExp,
-		RefreshExp:   tokens.RefreshExp,
-		Message:      "Tokens refreshed successfully",
+		Success: false,
+		Error:   "refresh not implemented yet",
 	}, nil
 }
 
-func (h *GRPCHandler) ValidateToken(
-	ctx context.Context,
-	req *pb.ValidateTokenRequest,
-) (*pb.ValidateTokenResponse, error) {
-	log.Printf("gRPC ValidateToken request")
+func (h *AuthHandler) ValidateToken(ctx context.Context, req *pb.ValidateTokenRequest) (*pb.ValidateTokenResponse, error) {
+	log.Printf("✅ Validate token")
 
-	user, err := h.authService.ValidateAccessToken(ctx, req.AccessToken)
+	claims, err := h.authService.ValidateToken(ctx, req.AccessToken)
 	if err != nil {
-		log.Printf("ValidateToken error: %v", err)
 		return &pb.ValidateTokenResponse{
 			Valid: false,
 			Error: err.Error(),
 		}, nil
 	}
 
-	log.Printf("ValidateToken successful: user_id=%s", user.ID.String())
-
 	return &pb.ValidateTokenResponse{
 		Valid: true,
 		User: &pb.User{
-			Id:        user.ID.String(),
-			Username:  user.Username,
-			Email:     user.Email,
-			Role:      user.Role,
-			CreatedAt: timestamppb.New(user.CreatedAt),
-			UpdatedAt: timestamppb.New(user.UpdatedAt),
+			Id:    claims.UserID,
+			Email: claims.Email,
 		},
 	}, nil
 }
 
-func (h *GRPCHandler) GetUser(
-	ctx context.Context,
-	req *pb.GetUserRequest,
-) (*pb.UserResponse, error) {
-	log.Printf("gRPC GetUser request: user_id=%s", req.UserId)
+func (h *AuthHandler) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.UserResponse, error) {
+	log.Printf("👤 GetUser: user_id=%s", req.UserId)
 
-	user, err := h.authService.GetUserByID(ctx, req.UserId)
-	if err != nil {
-		log.Printf("GetUser error: %v", err)
-		return &pb.UserResponse{
-			Error: err.Error(),
-		}, status.Error(codes.NotFound, err.Error())
-	}
-
-	if user == nil {
-		log.Printf("GetUser: user not found")
-		return &pb.UserResponse{
-			Error: "user not found",
-		}, status.Error(codes.NotFound, "user not found")
-	}
-
-	log.Printf("GetUser successful: user_id=%s", user.ID.String())
-
+	// TODO: Implement get user from database
 	return &pb.UserResponse{
 		User: &pb.User{
-			Id:        user.ID.String(),
-			Username:  user.Username,
-			Email:     user.Email,
-			Role:      user.Role,
-			CreatedAt: timestamppb.New(user.CreatedAt),
-			UpdatedAt: timestamppb.New(user.UpdatedAt),
+			Id:    req.UserId,
+			Email: "user@example.com",
 		},
 	}, nil
 }
 
-func (h *GRPCHandler) HealthCheck(
-	ctx context.Context,
-	req *pb.HealthRequest,
-) (*pb.HealthResponse, error) {
-	log.Printf("gRPC Health request")
+func (h *AuthHandler) HealthCheck(ctx context.Context, req *pb.HealthRequest) (*pb.HealthResponse, error) {
+	log.Printf("💚 HealthCheck")
 
 	return &pb.HealthResponse{
 		Healthy:   true,
-		Status:    "Auth Service is healthy and running",
+		Status:    "ok",
 		Timestamp: time.Now().Format(time.RFC3339),
 	}, nil
 }

@@ -1,0 +1,98 @@
+syntax = "proto3";
+
+package analytics;
+
+option go_package = "github.com/AllaxSydia/trenager/proto/analytics";
+
+import "google/protobuf/timestamp.proto";
+
+service AnalyticsService {
+  // Отслеживание события
+  rpc TrackEvent(TrackEventRequest) returns (TrackEventResponse);
+  
+  // Получение прогресса пользователя
+  rpc GetUserProgress(GetUserProgressRequest) returns (UserProgress);
+  
+  // Получение лидерборда
+  rpc GetLeaderboard(GetLeaderboardRequest) returns (Leaderboard);
+  
+  // Получение активности пользователя
+  rpc GetUserActivity(GetUserActivityRequest) returns (UserActivity);
+  
+  // Получение статистики по задачам
+  rpc GetTaskStats(GetTaskStatsRequest) returns (TaskStats);
+}
+
+message TrackEventRequest {
+  string user_id = 1;
+  string event_type = 2; // task_started, task_completed, code_submitted
+  map<string, string> metadata = 3;
+  google.protobuf.Timestamp timestamp = 4;
+}
+
+message TrackEventResponse {
+  bool success = 1;
+  string event_id = 2;
+}
+
+message GetUserProgressRequest {
+  string user_id = 1;
+}
+
+message UserProgress {
+  string user_id = 1;
+  int32 total_tasks_attempted = 2;
+  int32 total_tasks_completed = 3;
+  float overall_score = 4;
+  int32 total_xp = 5;
+  int32 current_streak_days = 6;
+  map<string, int32> tasks_by_difficulty = 7;
+  map<string, float> skills_progress = 8;
+}
+
+message GetLeaderboardRequest {
+  string timeframe = 1; // weekly, monthly, all_time
+  int32 limit = 2;
+}
+
+message LeaderboardEntry {
+  int32 rank = 1;
+  string user_id = 2;
+  string username = 3;
+  int32 score = 4;
+  int32 tasks_completed = 5;
+}
+
+message Leaderboard {
+  repeated LeaderboardEntry entries = 1;
+  string timeframe = 2;
+}
+
+message GetUserActivityRequest {
+  string user_id = 1;
+  int32 days = 2;
+}
+
+message Activity {
+  string date = 1;
+  int32 tasks_completed = 2;
+  int32 xp_earned = 3;
+}
+
+message UserActivity {
+  string user_id = 1;
+  repeated Activity activities = 2;
+}
+
+message GetTaskStatsRequest {
+  string task_id = 1;
+}
+
+message TaskStats {
+  string task_id = 1;
+  int32 total_attempts = 2;
+  int32 successful_attempts = 3;
+  float success_rate = 4;
+  float average_score = 5;
+  map<string, int32> score_distribution = 6;
+}

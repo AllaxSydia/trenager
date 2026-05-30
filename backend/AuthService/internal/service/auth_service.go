@@ -1,82 +1,79 @@
 package service
 
 import (
-	"auth-service/internal/models"
-	"auth-service/internal/repository"
-	"auth-service/pkg/jwt"
 	"context"
 	"errors"
+	"log"
+	"time"
 
+	"auth-service/internal/models"
+	"auth-service/internal/repository"
+
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
-type AuthService interface {
-	Register(ctx context.Context, username, email, password string) (*models.User, *jwt.TokenPair, error)
-	Login(ctx context.Context, email, password string) (*models.User, *jwt.TokenPair, error)
-	ValidateAccessToken(ctx context.Context, token string) (*models.User, error)
-	RefreshTokens(ctx context.Context, refreshToken string) (*jwt.TokenPair, error)
-	GetUserByID(ctx context.Context, userID string) (*models.User, error)
-	Logout(ctx context.Context, refreshToken string) error
+type AuthService struct {
+	repo      *repository.UserRepository
+	jwtSecret []byte
 }
 
-type authService struct {
-	userRepo repository.UserRepository
-	jwt      *jwt.Manager
-}
-
-func NewAuthService(
-	userRepo repository.UserRepository,
-	accessSecret string,
-	refreshSecret string,
-) AuthService {
-	return &authService{
-		userRepo: userRepo,
-		jwt:      jwt.NewManager(accessSecret, refreshSecret),
+func NewAuthService(repo *repository.UserRepository, jwtSecret string) *AuthService {
+	return &AuthService{
+		repo:      repo,
+		jwtSecret: []byte(jwtSecret),
 	}
 }
 
-func (s *authService) Register(
-	ctx context.Context,
-	username string,
-	email string,
-	password string,
-) (*models.User, *jwt.TokenPair, error) {
-	// Проверяем существование пользователя
-	existingUser, err := s.userRepo.FindByEmail(ctx, email)
-	if err != nil {
-		return nil, nil, err
-	}
+func (s *AuthService) Register(ctx context.Context, username, email, password string) (*models.User, *models.TokenPair, error) {
+	log.Printf("Registering user: %s", email)
+
+	// Проверяем, существует ли пользователь
+	existingUser, _ := s.repo.GetByEmail(ctx, email)
 	if existingUser != nil {
 		return nil, nil, errors.New("user already exists")
 	}
 
-	// Создаем пользователя
-	user, err := models.NewUser(username, email, password)
+	// Хешируем пароль
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, nil, errors.New("failed to hash password")
+	}
+
+	user := &models.User{
+		ID:           uuid.New(),
+		Username:     username,
+		Email:        email,
+		PasswordHash: string(hashedPassword),
+		Role:         "user",
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+	}
+
+	if err := s.repo.Create(ctx, user); err != nil {
+		return nil, nil, err
+	}
+
+	// Генерируем токены
+	tokens, err := s.generateTokens(user.ID.String(), user.Email, user.Role)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	// Сохраняем в БД
-	if err := s.userRepo.Create(ctx, user); err != nil {
-		return nil, nil, err
+	// Сохраняем refresh token
+	if err := s.repo.SaveRefreshToken(ctx, user.ID, tokens.RefreshToken, tokens.RefreshExp); err != nil {
+		log.Printf("Warning: failed to save refresh token: %v", err)
 	}
 
-	// Генерируем пару токенов
-	tokenPair, err := s.jwt.GenerateTokenPair(user.ID.String(), user.Role)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return user, tokenPair, nil
+	return user, tokens, nil
 }
 
-func (s *authService) Login(
-	ctx context.Context,
-	email,
-	password string,
-) (*models.User, *jwt.TokenPair, error) {
-	// Находим пользователя по email
-	user, err := s.userRepo.FindByEmail(ctx, email)
+func (s *AuthService) Login(ctx context.Context, email, password string) (*models.User, *models.TokenPair, error) {
+	log.Printf("Login attempt: %s", email)
+
+	// Находим пользователя
+	user, err := s.repo.GetByEmail(ctx, email)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -85,63 +82,82 @@ func (s *authService) Login(
 	}
 
 	// Проверяем пароль
-	if !user.CheckPassword(password) {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
 		return nil, nil, errors.New("invalid credentials")
 	}
 
-	// Генерируем пару токенов
-	tokenPair, err := s.jwt.GenerateTokenPair(user.ID.String(), user.Role)
+	// Обновляем время последнего входа
+	s.repo.UpdateLastLogin(ctx, user.ID)
+
+	// Генерируем токены
+	tokens, err := s.generateTokens(user.ID.String(), user.Email, user.Role)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return user, tokenPair, nil
-}
-
-func (s *authService) ValidateAccessToken(
-	ctx context.Context,
-	token string,
-) (*models.User, error) {
-	claims, err := s.jwt.ValidateAccessToken(token)
-	if err != nil {
-		return nil, err
+	// Сохраняем refresh token
+	if err := s.repo.SaveRefreshToken(ctx, user.ID, tokens.RefreshToken, tokens.RefreshExp); err != nil {
+		log.Printf("Warning: failed to save refresh token: %v", err)
 	}
 
-	userIDStr, ok := claims["user_id"].(string)
+	return user, tokens, nil
+}
+
+func (s *AuthService) ValidateToken(ctx context.Context, tokenString string) (*models.Claims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return s.jwtSecret, nil
+	})
+
+	if err != nil {
+		return nil, errors.New("invalid token")
+	}
+
+	if !token.Valid {
+		return nil, errors.New("invalid token")
+	}
+
+	claims, ok := token.Claims.(*jwt.RegisteredClaims)
 	if !ok {
-		return nil, errors.New("Invalid token claims")
+		return nil, errors.New("invalid claims")
 	}
 
-	userID, err := uuid.Parse(userIDStr)
+	return &models.Claims{
+		UserID: claims.Subject,
+		Email:  claims.Issuer,
+	}, nil
+}
+
+func (s *AuthService) generateTokens(userID, email, role string) (*models.TokenPair, error) {
+	accessExp := time.Now().Add(15 * time.Minute)
+	refreshExp := time.Now().Add(7 * 24 * time.Hour)
+
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
+		Subject:   userID,
+		Issuer:    email,
+		ExpiresAt: jwt.NewNumericDate(accessExp),
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+	})
+
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
+		Subject:   userID,
+		ExpiresAt: jwt.NewNumericDate(refreshExp),
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+	})
+
+	accessTokenString, err := accessToken.SignedString(s.jwtSecret)
 	if err != nil {
 		return nil, err
 	}
 
-	return s.userRepo.FindByID(ctx, userID)
-}
-
-func (s *authService) RefreshTokens(
-	ctx context.Context,
-	refreshToken string,
-) (*jwt.TokenPair, error) {
-	return s.jwt.RefreshTokens(refreshToken)
-}
-
-func (s *authService) GetUserByID(
-	ctx context.Context,
-	userID string,
-) (*models.User, error) {
-	id, err := uuid.Parse(userID)
+	refreshTokenString, err := refreshToken.SignedString(s.jwtSecret)
 	if err != nil {
 		return nil, err
 	}
 
-	return s.userRepo.FindByID(ctx, id)
-}
-
-func (s *authService) Logout(
-	ctx context.Context,
-	refreshToken string,
-) error {
-	return nil
+	return &models.TokenPair{
+		AccessToken:  accessTokenString,
+		RefreshToken: refreshTokenString,
+		AccessExp:    accessExp.Unix(),
+		RefreshExp:   refreshExp.Unix(),
+	}, nil
 }

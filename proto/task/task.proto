@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package task;
+
+option go_package = "code-trainer/proto/task";
+
+import "google/protobuf/timestamp.proto";
+
+service TaskService {
+  rpc CreateTask(CreateTaskRequest) returns (TaskResponse);
+  rpc GetTask(GetTaskRequest) returns (Task);
+  rpc ListTasks(ListTasksRequest) returns (ListTasksResponse);
+  rpc UpdateTask(UpdateTaskRequest) returns (TaskResponse);
+  rpc DeleteTask(DeleteTaskRequest) returns (DeleteTaskResponse);
+  rpc GetTasksByDifficulty(GetTasksByDifficultyRequest) returns (ListTasksResponse);
+}
+
+message CreateTaskRequest {
+  string title = 1;
+  string description = 2;
+  string difficulty = 3; // easy, medium, hard
+  repeated TestCase test_cases = 4;
+  int32 time_limit_ms = 5;
+  int32 memory_limit_mb = 6;
+  string language = 7; // go, python, javascript и т.д.
+}
+
+message GetTaskRequest {
+  string task_id = 1;
+}
+
+message ListTasksRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  string language = 3;
+  string difficulty = 4;
+}
+
+message UpdateTaskRequest {
+  string task_id = 1;
+  string title = 2;
+  string description = 3;
+  string difficulty = 4;
+  repeated TestCase test_cases = 5;
+}
+
+message DeleteTaskRequest {
+  string task_id = 1;
+}
+
+message GetTasksByDifficultyRequest {
+  string difficulty = 1;
+  int32 limit = 2;
+}
+
+message Task {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  string difficulty = 4;
+  repeated TestCase test_cases = 5;
+  int32 time_limit_ms = 6;
+  int32 memory_limit_mb = 7;
+  string language = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+}
+
+message TestCase {
+  string input = 1;
+  string expected_output = 2;
+  bool is_hidden = 3; // скрытый тест для финальной проверки
+}
+
+message TaskResponse {
+  bool success = 1;
+  string task_id = 2;
+  string message = 3;
+  string error = 4;
+}
+
+message DeleteTaskResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ListTasksResponse {
+  repeated Task tasks = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}

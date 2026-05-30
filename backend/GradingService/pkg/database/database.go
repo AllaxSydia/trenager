@@ -28,7 +28,7 @@ func NewDatabase(cfg *Config) (*Database, error) {
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName, cfg.SSLMode)
 
-	log.Printf("Connecting to auth database: host=%s port=%s dbname=%s", cfg.Host, cfg.Port, cfg.DBName)
+	log.Printf("Connecting to grading database: host=%s port=%s dbname=%s", cfg.Host, cfg.Port, cfg.DBName)
 
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
@@ -46,7 +46,7 @@ func NewDatabase(cfg *Config) (*Database, error) {
 		return nil, fmt.Errorf("error connecting to database: %w", err)
 	}
 
-	log.Println("AuthService database connected successfully")
+	log.Println("GradingService database connected successfully")
 	return &Database{DB: db}, nil
 }
 
@@ -65,9 +65,9 @@ func LoadConfig() *Config {
 	return &Config{
 		Host:     getEnv("DB_HOST", "localhost"),
 		Port:     getEnv("DB_PORT", "5432"),
-		User:     getEnv("DB_USER", "authuser"),
-		Password: getEnv("DB_PASSWORD", "authpass123"),
-		DBName:   getEnv("DB_NAME", "authdb"),
+		User:     getEnv("DB_USER", "gradinguser"),
+		Password: getEnv("DB_PASSWORD", "gradingpass123"),
+		DBName:   getEnv("DB_NAME", "gradingdb"),
 		SSLMode:  getEnv("DB_SSLMODE", "disable"),
 	}
 }
