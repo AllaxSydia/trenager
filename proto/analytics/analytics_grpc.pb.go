@@ -101,7 +101,7 @@ func (c *analyticsServiceClient) GetTaskStats(ctx context.Context, in *GetTaskSt
 }
 
 // AnalyticsServiceServer is the server API for AnalyticsService service.
-// All implementations should embed UnimplementedAnalyticsServiceServer
+// All implementations must embed UnimplementedAnalyticsServiceServer
 // for forward compatibility.
 type AnalyticsServiceServer interface {
 	// Отслеживание события
@@ -114,9 +114,10 @@ type AnalyticsServiceServer interface {
 	GetUserActivity(context.Context, *GetUserActivityRequest) (*UserActivity, error)
 	// Получение статистики по задачам
 	GetTaskStats(context.Context, *GetTaskStatsRequest) (*TaskStats, error)
+	mustEmbedUnimplementedAnalyticsServiceServer()
 }
 
-// UnimplementedAnalyticsServiceServer should be embedded to have
+// UnimplementedAnalyticsServiceServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
@@ -138,7 +139,8 @@ func (UnimplementedAnalyticsServiceServer) GetUserActivity(context.Context, *Get
 func (UnimplementedAnalyticsServiceServer) GetTaskStats(context.Context, *GetTaskStatsRequest) (*TaskStats, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetTaskStats not implemented")
 }
-func (UnimplementedAnalyticsServiceServer) testEmbeddedByValue() {}
+func (UnimplementedAnalyticsServiceServer) mustEmbedUnimplementedAnalyticsServiceServer() {}
+func (UnimplementedAnalyticsServiceServer) testEmbeddedByValue()                          {}
 
 // UnsafeAnalyticsServiceServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to AnalyticsServiceServer will

@@ -1,8 +1,8 @@
 package service
 
 import (
-	"TaskService/internal/models"
-	"TaskService/internal/repository"
+	"task-service/internal/models"
+	"task-service/internal/repository"
 	"context"
 
 	"github.com/google/uuid"

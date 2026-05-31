@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.6.2
 // - protoc             v6.33.4
-// source: proto/execution/execution.proto
+// source: execution/execution.proto
 
 package execution
 
@@ -193,5 +193,5 @@ var ExecutionService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/execution/execution.proto",
+	Metadata: "execution/execution.proto",
 }

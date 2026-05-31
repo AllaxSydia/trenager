@@ -1,0 +1,5 @@
+2026/05/31 14:20:08 🔐 Starting AuthService gRPC server...
+2026/05/31 14:20:08 Connecting to auth database: host=localhost port=5432 dbname=authdb
+2026/05/31 14:20:08 AuthService database connected successfully
+2026/05/31 14:20:08 Failed to listen: listen tcp :50051: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted.
+exit status 1

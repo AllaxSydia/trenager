@@ -8,6 +8,7 @@ import (
 	"auth-service/internal/service"
 
 	pb "github.com/AllaxSydia/trenager/proto/auth"
+
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

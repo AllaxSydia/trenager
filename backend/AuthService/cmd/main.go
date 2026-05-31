@@ -13,6 +13,7 @@ import (
 	"auth-service/pkg/database"
 
 	pb "github.com/AllaxSydia/trenager/proto/auth"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )

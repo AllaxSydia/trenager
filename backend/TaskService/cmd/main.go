@@ -4,10 +4,10 @@ import (
 	"log"
 	"net"
 
-	"TaskService/internal/handler"
-	"TaskService/internal/repository"
-	"TaskService/internal/service"
-	"TaskService/pkg/database"
+	"task-service/internal/handler"
+	"task-service/internal/repository"
+	"task-service/internal/service"
+	"task-service/pkg/database"
 
 	pb "github.com/AllaxSydia/trenager/proto/task"
 	"google.golang.org/grpc"

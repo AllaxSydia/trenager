@@ -116,7 +116,7 @@ func (c *authServiceClient) HealthCheck(ctx context.Context, in *HealthRequest, 
 }
 
 // AuthServiceServer is the server API for AuthService service.
-// All implementations should embed UnimplementedAuthServiceServer
+// All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility.
 //
 // ============ SERVICE ============
@@ -133,9 +133,10 @@ type AuthServiceServer interface {
 	GetUser(context.Context, *GetUserRequest) (*UserResponse, error)
 	// Проверка здоровья сервиса
 	HealthCheck(context.Context, *HealthRequest) (*HealthResponse, error)
+	mustEmbedUnimplementedAuthServiceServer()
 }
 
-// UnimplementedAuthServiceServer should be embedded to have
+// UnimplementedAuthServiceServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
@@ -160,7 +161,8 @@ func (UnimplementedAuthServiceServer) GetUser(context.Context, *GetUserRequest) 
 func (UnimplementedAuthServiceServer) HealthCheck(context.Context, *HealthRequest) (*HealthResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method HealthCheck not implemented")
 }
-func (UnimplementedAuthServiceServer) testEmbeddedByValue() {}
+func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
+func (UnimplementedAuthServiceServer) testEmbeddedByValue()                     {}
 
 // UnsafeAuthServiceServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to AuthServiceServer will

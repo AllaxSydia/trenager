@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"strings"
 
-	"TaskService/internal/models"
-	"TaskService/pkg/database"
+	"task-service/internal/models"
+	"task-service/pkg/database"
 
 	"github.com/google/uuid"
 )

@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"TaskService/internal/models"
-	"TaskService/internal/service"
+	"task-service/internal/models"
+	"task-service/internal/service"
 	"context"
 
 	pb "github.com/AllaxSydia/trenager/proto/task" // путь к сгенерированному proto

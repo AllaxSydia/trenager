@@ -84,16 +84,17 @@ func (c *aIServiceClient) AskQuestion(ctx context.Context, in *AskQuestionReques
 }
 
 // AIServiceServer is the server API for AIService service.
-// All implementations should embed UnimplementedAIServiceServer
+// All implementations must embed UnimplementedAIServiceServer
 // for forward compatibility.
 type AIServiceServer interface {
 	GetHint(context.Context, *GetHintRequest) (*GetHintResponse, error)
 	ReviewCode(context.Context, *ReviewCodeRequest) (*ReviewCodeResponse, error)
 	GetRecommendations(context.Context, *GetRecommendationsRequest) (*GetRecommendationsResponse, error)
 	AskQuestion(context.Context, *AskQuestionRequest) (*AskQuestionResponse, error)
+	mustEmbedUnimplementedAIServiceServer()
 }
 
-// UnimplementedAIServiceServer should be embedded to have
+// UnimplementedAIServiceServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
@@ -112,7 +113,8 @@ func (UnimplementedAIServiceServer) GetRecommendations(context.Context, *GetReco
 func (UnimplementedAIServiceServer) AskQuestion(context.Context, *AskQuestionRequest) (*AskQuestionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method AskQuestion not implemented")
 }
-func (UnimplementedAIServiceServer) testEmbeddedByValue() {}
+func (UnimplementedAIServiceServer) mustEmbedUnimplementedAIServiceServer() {}
+func (UnimplementedAIServiceServer) testEmbeddedByValue()                   {}
 
 // UnsafeAIServiceServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to AIServiceServer will

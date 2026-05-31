@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.11
 // 	protoc        v6.33.4
-// source: proto/grading/grading.proto
+// source: grading/grading.proto
 
 package grading
 
@@ -34,7 +34,7 @@ type SubmitSolutionRequest struct {
 
 func (x *SubmitSolutionRequest) Reset() {
 	*x = SubmitSolutionRequest{}
-	mi := &file_proto_grading_grading_proto_msgTypes[0]
+	mi := &file_grading_grading_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -46,7 +46,7 @@ func (x *SubmitSolutionRequest) String() string {
 func (*SubmitSolutionRequest) ProtoMessage() {}
 
 func (x *SubmitSolutionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_grading_grading_proto_msgTypes[0]
+	mi := &file_grading_grading_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -59,7 +59,7 @@ func (x *SubmitSolutionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubmitSolutionRequest.ProtoReflect.Descriptor instead.
 func (*SubmitSolutionRequest) Descriptor() ([]byte, []int) {
-	return file_proto_grading_grading_proto_rawDescGZIP(), []int{0}
+	return file_grading_grading_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *SubmitSolutionRequest) GetTaskId() string {
@@ -102,7 +102,7 @@ type SubmitSolutionResponse struct {
 
 func (x *SubmitSolutionResponse) Reset() {
 	*x = SubmitSolutionResponse{}
-	mi := &file_proto_grading_grading_proto_msgTypes[1]
+	mi := &file_grading_grading_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -114,7 +114,7 @@ func (x *SubmitSolutionResponse) String() string {
 func (*SubmitSolutionResponse) ProtoMessage() {}
 
 func (x *SubmitSolutionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_grading_grading_proto_msgTypes[1]
+	mi := &file_grading_grading_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -127,7 +127,7 @@ func (x *SubmitSolutionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubmitSolutionResponse.ProtoReflect.Descriptor instead.
 func (*SubmitSolutionResponse) Descriptor() ([]byte, []int) {
-	return file_proto_grading_grading_proto_rawDescGZIP(), []int{1}
+	return file_grading_grading_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *SubmitSolutionResponse) GetSuccess() bool {
@@ -167,7 +167,7 @@ type GetGradeRequest struct {
 
 func (x *GetGradeRequest) Reset() {
 	*x = GetGradeRequest{}
-	mi := &file_proto_grading_grading_proto_msgTypes[2]
+	mi := &file_grading_grading_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -179,7 +179,7 @@ func (x *GetGradeRequest) String() string {
 func (*GetGradeRequest) ProtoMessage() {}
 
 func (x *GetGradeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_grading_grading_proto_msgTypes[2]
+	mi := &file_grading_grading_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -192,7 +192,7 @@ func (x *GetGradeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetGradeRequest.ProtoReflect.Descriptor instead.
 func (*GetGradeRequest) Descriptor() ([]byte, []int) {
-	return file_proto_grading_grading_proto_rawDescGZIP(), []int{2}
+	return file_grading_grading_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *GetGradeRequest) GetSubmissionId() string {
@@ -220,7 +220,7 @@ type Grade struct {
 
 func (x *Grade) Reset() {
 	*x = Grade{}
-	mi := &file_proto_grading_grading_proto_msgTypes[3]
+	mi := &file_grading_grading_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -232,7 +232,7 @@ func (x *Grade) String() string {
 func (*Grade) ProtoMessage() {}
 
 func (x *Grade) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_grading_grading_proto_msgTypes[3]
+	mi := &file_grading_grading_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -245,7 +245,7 @@ func (x *Grade) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Grade.ProtoReflect.Descriptor instead.
 func (*Grade) Descriptor() ([]byte, []int) {
-	return file_proto_grading_grading_proto_rawDescGZIP(), []int{3}
+	return file_grading_grading_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Grade) GetSubmissionId() string {
@@ -332,7 +332,7 @@ type TestResult struct {
 
 func (x *TestResult) Reset() {
 	*x = TestResult{}
-	mi := &file_proto_grading_grading_proto_msgTypes[4]
+	mi := &file_grading_grading_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -344,7 +344,7 @@ func (x *TestResult) String() string {
 func (*TestResult) ProtoMessage() {}
 
 func (x *TestResult) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_grading_grading_proto_msgTypes[4]
+	mi := &file_grading_grading_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -357,7 +357,7 @@ func (x *TestResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestResult.ProtoReflect.Descriptor instead.
 func (*TestResult) Descriptor() ([]byte, []int) {
-	return file_proto_grading_grading_proto_rawDescGZIP(), []int{4}
+	return file_grading_grading_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *TestResult) GetTestName() string {
@@ -413,7 +413,7 @@ type GetUserGradesRequest struct {
 
 func (x *GetUserGradesRequest) Reset() {
 	*x = GetUserGradesRequest{}
-	mi := &file_proto_grading_grading_proto_msgTypes[5]
+	mi := &file_grading_grading_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -425,7 +425,7 @@ func (x *GetUserGradesRequest) String() string {
 func (*GetUserGradesRequest) ProtoMessage() {}
 
 func (x *GetUserGradesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_grading_grading_proto_msgTypes[5]
+	mi := &file_grading_grading_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -438,7 +438,7 @@ func (x *GetUserGradesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserGradesRequest.ProtoReflect.Descriptor instead.
 func (*GetUserGradesRequest) Descriptor() ([]byte, []int) {
-	return file_proto_grading_grading_proto_rawDescGZIP(), []int{5}
+	return file_grading_grading_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *GetUserGradesRequest) GetUserId() string {
@@ -472,7 +472,7 @@ type GetUserGradesResponse struct {
 
 func (x *GetUserGradesResponse) Reset() {
 	*x = GetUserGradesResponse{}
-	mi := &file_proto_grading_grading_proto_msgTypes[6]
+	mi := &file_grading_grading_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -484,7 +484,7 @@ func (x *GetUserGradesResponse) String() string {
 func (*GetUserGradesResponse) ProtoMessage() {}
 
 func (x *GetUserGradesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_grading_grading_proto_msgTypes[6]
+	mi := &file_grading_grading_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -497,7 +497,7 @@ func (x *GetUserGradesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserGradesResponse.ProtoReflect.Descriptor instead.
 func (*GetUserGradesResponse) Descriptor() ([]byte, []int) {
-	return file_proto_grading_grading_proto_rawDescGZIP(), []int{6}
+	return file_grading_grading_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *GetUserGradesResponse) GetGrades() []*Grade {
@@ -523,7 +523,7 @@ type GetTaskStatisticsRequest struct {
 
 func (x *GetTaskStatisticsRequest) Reset() {
 	*x = GetTaskStatisticsRequest{}
-	mi := &file_proto_grading_grading_proto_msgTypes[7]
+	mi := &file_grading_grading_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -535,7 +535,7 @@ func (x *GetTaskStatisticsRequest) String() string {
 func (*GetTaskStatisticsRequest) ProtoMessage() {}
 
 func (x *GetTaskStatisticsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_grading_grading_proto_msgTypes[7]
+	mi := &file_grading_grading_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -548,7 +548,7 @@ func (x *GetTaskStatisticsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTaskStatisticsRequest.ProtoReflect.Descriptor instead.
 func (*GetTaskStatisticsRequest) Descriptor() ([]byte, []int) {
-	return file_proto_grading_grading_proto_rawDescGZIP(), []int{7}
+	return file_grading_grading_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GetTaskStatisticsRequest) GetTaskId() string {
@@ -571,7 +571,7 @@ type TaskStatistics struct {
 
 func (x *TaskStatistics) Reset() {
 	*x = TaskStatistics{}
-	mi := &file_proto_grading_grading_proto_msgTypes[8]
+	mi := &file_grading_grading_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -583,7 +583,7 @@ func (x *TaskStatistics) String() string {
 func (*TaskStatistics) ProtoMessage() {}
 
 func (x *TaskStatistics) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_grading_grading_proto_msgTypes[8]
+	mi := &file_grading_grading_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -596,7 +596,7 @@ func (x *TaskStatistics) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TaskStatistics.ProtoReflect.Descriptor instead.
 func (*TaskStatistics) Descriptor() ([]byte, []int) {
-	return file_proto_grading_grading_proto_rawDescGZIP(), []int{8}
+	return file_grading_grading_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *TaskStatistics) GetTaskId() string {
@@ -634,11 +634,11 @@ func (x *TaskStatistics) GetScoreDistribution() map[string]int32 {
 	return nil
 }
 
-var File_proto_grading_grading_proto protoreflect.FileDescriptor
+var File_grading_grading_proto protoreflect.FileDescriptor
 
-const file_proto_grading_grading_proto_rawDesc = "" +
+const file_grading_grading_proto_rawDesc = "" +
 	"\n" +
-	"\x1bproto/grading/grading.proto\x12\agrading\x1a\x1fgoogle/protobuf/timestamp.proto\"y\n" +
+	"\x15grading/grading.proto\x12\agrading\x1a\x1fgoogle/protobuf/timestamp.proto\"y\n" +
 	"\x15SubmitSolutionRequest\x12\x17\n" +
 	"\atask_id\x18\x01 \x01(\tR\x06taskId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x12\n" +
@@ -696,19 +696,19 @@ const file_proto_grading_grading_proto_rawDesc = "" +
 	"\x11GetTaskStatistics\x12!.grading.GetTaskStatisticsRequest\x1a\x17.grading.TaskStatisticsB\x1cZ\x1acode-trainer/proto/gradingb\x06proto3"
 
 var (
-	file_proto_grading_grading_proto_rawDescOnce sync.Once
-	file_proto_grading_grading_proto_rawDescData []byte
+	file_grading_grading_proto_rawDescOnce sync.Once
+	file_grading_grading_proto_rawDescData []byte
 )
 
-func file_proto_grading_grading_proto_rawDescGZIP() []byte {
-	file_proto_grading_grading_proto_rawDescOnce.Do(func() {
-		file_proto_grading_grading_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_grading_grading_proto_rawDesc), len(file_proto_grading_grading_proto_rawDesc)))
+func file_grading_grading_proto_rawDescGZIP() []byte {
+	file_grading_grading_proto_rawDescOnce.Do(func() {
+		file_grading_grading_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_grading_grading_proto_rawDesc), len(file_grading_grading_proto_rawDesc)))
 	})
-	return file_proto_grading_grading_proto_rawDescData
+	return file_grading_grading_proto_rawDescData
 }
 
-var file_proto_grading_grading_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
-var file_proto_grading_grading_proto_goTypes = []any{
+var file_grading_grading_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_grading_grading_proto_goTypes = []any{
 	(*SubmitSolutionRequest)(nil),    // 0: grading.SubmitSolutionRequest
 	(*SubmitSolutionResponse)(nil),   // 1: grading.SubmitSolutionResponse
 	(*GetGradeRequest)(nil),          // 2: grading.GetGradeRequest
@@ -721,7 +721,7 @@ var file_proto_grading_grading_proto_goTypes = []any{
 	nil,                              // 9: grading.TaskStatistics.ScoreDistributionEntry
 	(*timestamppb.Timestamp)(nil),    // 10: google.protobuf.Timestamp
 }
-var file_proto_grading_grading_proto_depIdxs = []int32{
+var file_grading_grading_proto_depIdxs = []int32{
 	3,  // 0: grading.SubmitSolutionResponse.grade:type_name -> grading.Grade
 	4,  // 1: grading.Grade.test_results:type_name -> grading.TestResult
 	10, // 2: grading.Grade.submitted_at:type_name -> google.protobuf.Timestamp
@@ -743,26 +743,26 @@ var file_proto_grading_grading_proto_depIdxs = []int32{
 	0,  // [0:6] is the sub-list for field type_name
 }
 
-func init() { file_proto_grading_grading_proto_init() }
-func file_proto_grading_grading_proto_init() {
-	if File_proto_grading_grading_proto != nil {
+func init() { file_grading_grading_proto_init() }
+func file_grading_grading_proto_init() {
+	if File_grading_grading_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_grading_grading_proto_rawDesc), len(file_proto_grading_grading_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_grading_grading_proto_rawDesc), len(file_grading_grading_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_proto_grading_grading_proto_goTypes,
-		DependencyIndexes: file_proto_grading_grading_proto_depIdxs,
-		MessageInfos:      file_proto_grading_grading_proto_msgTypes,
+		GoTypes:           file_grading_grading_proto_goTypes,
+		DependencyIndexes: file_grading_grading_proto_depIdxs,
+		MessageInfos:      file_grading_grading_proto_msgTypes,
 	}.Build()
-	File_proto_grading_grading_proto = out.File
-	file_proto_grading_grading_proto_goTypes = nil
-	file_proto_grading_grading_proto_depIdxs = nil
+	File_grading_grading_proto = out.File
+	file_grading_grading_proto_goTypes = nil
+	file_grading_grading_proto_depIdxs = nil
 }

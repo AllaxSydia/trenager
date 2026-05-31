@@ -1,11 +1,11 @@
 module analytics-service
 
-go 1.25.3
+go 1.25.0
 
 require (
-	github.com/AllaxSydia/trenager v0.0.0-00010101000000-000000000000
+	github.com/AllaxSydia/trenager/proto v0.0.0-00010101000000-000000000000
 	github.com/google/uuid v1.6.0
-	github.com/lib/pq v1.12.3
+	github.com/lib/pq v1.10.9
 	google.golang.org/grpc v1.81.1
 )
 
@@ -17,4 +17,4 @@ require (
 	google.golang.org/protobuf v1.36.11 // indirect
 )
 
-replace github.com/AllaxSydia/trenager => ../..
+replace github.com/AllaxSydia/trenager/proto => ../../proto

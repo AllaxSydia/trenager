@@ -11,8 +11,8 @@ import (
 
 	pb "github.com/AllaxSydia/trenager/proto/execution"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 )
 

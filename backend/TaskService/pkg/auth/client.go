@@ -143,8 +143,8 @@ func extractTokenFromContext(ctx context.Context) (string, error) {
 func AuthRequired(method string) bool {
 	// Методы, не требующие аутентификации
 	publicMethods := map[string]bool{
-		"/task.TaskService/GetTask":   false, // Публичные задачи может смотреть любой
-		"/task.TaskService/ListTasks": false,
+		"/task.task-service/GetTask":   false, // Публичные задачи может смотреть любой
+		"/task.task-service/ListTasks": false,
 	}
 
 	if required, exists := publicMethods[method]; exists {

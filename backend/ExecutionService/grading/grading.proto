@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package grading;
+
+option go_package = "github.com/AllaxSydia/trenager/proto/grading";
+
+import "google/protobuf/timestamp.proto";
+
+service GradingService {
+  rpc SubmitSolution(SubmitSolutionRequest) returns (SubmitSolutionResponse);
+  rpc GetGrade(GetGradeRequest) returns (Grade);
+  rpc GetUserGrades(GetUserGradesRequest) returns (GetUserGradesResponse);
+  rpc GetTaskStatistics(GetTaskStatisticsRequest) returns (TaskStatistics);
+}
+
+message SubmitSolutionRequest {
+  string task_id = 1;
+  string user_id = 2;
+  string code = 3;
+  string language = 4;
+}
+
+message SubmitSolutionResponse {
+  bool success = 1;
+  string submission_id = 2;
+  string message = 3;
+  Grade grade = 4;
+}
+
+message GetGradeRequest {
+  string submission_id = 1;
+}
+
+message Grade {
+  string submission_id = 1;
+  string task_id = 2;
+  string user_id = 3;
+  int32 score = 4;
+  int32 max_score = 5;
+  string status = 6; // pending, passed, failed, partial
+  string feedback = 7;
+  repeated TestResult test_results = 8;
+  google.protobuf.Timestamp submitted_at = 9;
+  google.protobuf.Timestamp graded_at = 10;
+}
+
+message TestResult {
+  string test_name = 1;
+  bool passed = 2;
+  string output = 3;
+  string expected = 4;
+  int32 score = 5;
+  int32 max_score = 6;
+}
+
+message GetUserGradesRequest {
+  string user_id = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+
+message GetUserGradesResponse {
+  repeated Grade grades = 1;
+  int32 total = 2;
+}
+
+message GetTaskStatisticsRequest {
+  string task_id = 1;
+}
+
+message TaskStatistics {
+  string task_id = 1;
+  int32 total_submissions = 2;
+  int32 successful_submissions = 3;
+  float average_score = 4;
+  map<string, int32> score_distribution = 5;
+}

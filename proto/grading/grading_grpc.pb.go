@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.6.2
 // - protoc             v6.33.4
-// source: proto/grading/grading.proto
+// source: grading/grading.proto
 
 package grading
 
@@ -231,5 +231,5 @@ var GradingService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/grading/grading.proto",
+	Metadata: "grading/grading.proto",
 }
