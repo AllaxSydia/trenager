@@ -1,0 +1,4 @@
+2026/05/31 14:29:30 Connecting to database: host=localhost port=5432 dbname=tasksdb
+2026/05/31 14:29:30 Database connected successfully
+2026/05/31 14:29:30 ✅ TaskService running on :50052 with PostgreSQL
+exit status 1

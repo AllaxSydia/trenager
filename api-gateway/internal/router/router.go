@@ -15,6 +15,7 @@ func NewRouter(clients *client.GRPCClients) http.Handler {
 
 	authHandler := handler.NewAuthHandler(clients)
 	taskHandler := handler.NewTaskHandler(clients)
+	executionHandler := handler.NewExecutionHandler(clients)
 
 	// CORS
 	cors := handlers.CORS(
@@ -34,8 +35,13 @@ func NewRouter(clients *client.GRPCClients) http.Handler {
 	api.HandleFunc("/tasks", taskHandler.ListTasks).Methods("GET")
 	api.HandleFunc("/tasks", taskHandler.CreateTask).Methods("POST")
 
+	// Execution routes
+	api.HandleFunc("/execute", executionHandler.ExecuteCode).Methods("POST")
+	api.HandleFunc("/execute/test", executionHandler.ExecuteTest).Methods("POST")
+
 	// Health
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{"status":"ok"}`))
 	}).Methods("GET")

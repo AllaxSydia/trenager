@@ -1,13 +1,17 @@
 FROM golang:1.25-alpine
 
+# Устанавливаем runtime для разных языков
+RUN apk add --no-cache python3 py3-pip nodejs openjdk21
+
 WORKDIR /app
 
-# Копируем и собираем
+COPY go.mod go.sum ./
+RUN go mod download
+
 COPY . .
 
-RUN go mod download
-RUN go build -o service cmd/main.go
+RUN go build -o execution-service cmd/main.go
 
-EXPOSE 0
+EXPOSE 50054
 
-CMD ["./service"]
+CMD ["./execution-service"]

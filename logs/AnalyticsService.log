@@ -1,5 +1,5 @@
-2026/05/31 14:20:19 📊 Starting AnalyticsService gRPC server...
-2026/05/31 14:20:19 Connecting to analytics database: host=localhost port=5432 dbname=analyticsdb
-2026/05/31 14:20:19 AnalyticsService database connected successfully
-2026/05/31 14:20:19 Failed to listen: listen tcp :50056: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted.
+2026/05/31 14:29:38 📊 Starting AnalyticsService gRPC server...
+2026/05/31 14:29:38 Connecting to analytics database: host=localhost port=5432 dbname=analyticsdb
+2026/05/31 14:29:38 AnalyticsService database connected successfully
+2026/05/31 14:29:38 ✅ AnalyticsService running on :50056 with PostgreSQL
 exit status 1

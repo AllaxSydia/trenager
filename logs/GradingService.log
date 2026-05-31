@@ -1,5 +1,5 @@
-2026/05/31 14:20:12 📊 Starting GradingService gRPC server...
-2026/05/31 14:20:12 Connecting to grading database: host=localhost port=5432 dbname=gradingdb
-2026/05/31 14:20:12 GradingService database connected successfully
-2026/05/31 14:20:12 Failed to listen: listen tcp :50053: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted.
+2026/05/31 14:29:32 📊 Starting GradingService gRPC server...
+2026/05/31 14:29:32 Connecting to grading database: host=localhost port=5432 dbname=gradingdb
+2026/05/31 14:29:32 GradingService database connected successfully
+2026/05/31 14:29:32 ✅ GradingService running on :50053 with PostgreSQL
 exit status 1

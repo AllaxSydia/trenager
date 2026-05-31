@@ -1,3 +1,7 @@
-2026/05/31 14:20:14 🚀 Starting ExecutionService gRPC server...
-2026/05/31 14:20:14 Failed to listen: listen tcp :50054: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted.
+2026/05/31 14:29:34 🚀 Starting ExecutionService gRPC server...
+2026/05/31 14:29:34 ✅ ExecutionService running on port 50054
+2026/05/31 14:29:34 ⚠️  Running in MOCK mode - code is not actually executed
+2026/05/31 14:29:51 💻 ExecuteCode: language=python, code_length=20
+2026/05/31 14:30:00 💻 ExecuteCode: language=go, code_length=29
+2026/05/31 14:30:04 🧪 ExecuteTest: language=python, tests_count=1
 exit status 1
